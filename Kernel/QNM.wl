@@ -49,6 +49,7 @@ Returns: <| \"QNMfrequency\" -> \[Omega], \"Radial Function\" -> F |>";
 
 QNMFrequency::real = "Only real values of a are allowed, but a=`1`.";
 QNMMode::coords = "Coordinate options are either \"Hyperboloidal\" or \"BL\", but got `1`";
+QNMMode::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`";
 
 
 (* ::Subsection:: *)
@@ -143,7 +144,7 @@ Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100}
 
 (*CP commment: the algorithm solves for the separation constant, while SpinWeightedSpheroidalEigenvalue gives the Angular eigenvalue: SeparationConstant= (SpinWeightedSpheroidalEigenvalue+2 m a \[Omega]guess- (a \[Omega]guess)^2) *)
 QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
-	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega],tol,NN},
+	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega],tol,NN,MAXITS,count},
 		(* Check for real spin *)
 		If[!RealValuedNumberQ[a],
 		Message[QNMFrequency::real, a];
@@ -161,13 +162,21 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		\[Epsilon]=10^-8;(*better way?*)
 		\[Gamma]=1;(*allow this to change?*)
 		
-		(* Iterate until tolerance is reached *)
+		(* Iterate until tolerance is reached or maximum iterations *)
+		MAXITS=1000;
+		count = 0;
 		Until[Norm[\[Delta]\[Omega]]<tol,
+			count += 1;
 			Print["Eigenvalue: ", \[Omega]guess];
 			F=SetPrecision[\[Delta]\[Lambda][\[Omega]guess, s,l, m, a,NN],50];
 			Fp=SetPrecision[(\[Delta]\[Lambda][\[Omega]guess+\[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-\[Epsilon], s,l, m, a,NN])/(2 \[Epsilon])+(\[Delta]\[Lambda][\[Omega]guess+I \[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-I \[Epsilon], s,l, m, a,NN])/(2 \[Epsilon] I),50];
 			\[Omega]guess= SetPrecision[\[Omega]guess-(\[Gamma] F)/Fp,50];
 			\[Delta]\[Omega]= SetPrecision[-(\[Gamma] F)/Fp,50]
+						
+			If[count > MAXITS, 
+				Message[QNMMode::convergence, \[Omega]guess;
+				Return[$Failed];
+			];
 		];
 		
 		(* Once result is obtained, return eigenvalue & separation constant *)
