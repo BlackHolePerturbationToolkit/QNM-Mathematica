@@ -52,14 +52,18 @@ Begin["`Private`"];
 (*Calculate QNM Frequency*)
 
 
-(* ::Subsection:: *)
+(*CP comment: To do: currently just n=0. Generalise?*)
+
+
+(* ::Subsection::Closed:: *)
 (*Parameters*)
 
 
+(*CP: cleared this up*)
 M=1;(*re-instate at some point????*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Operator Functions*)
 
 
@@ -69,7 +73,7 @@ B[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=(a^2-16M^2)\[Omega]^2+2(m a +2 I s 
 M\[Rho][\[Omega]_,s_Integer,m_Integer,a_]:=-\[Rho]^2\[CapitalDelta][\[Rho],a]R''[\[Rho]]+A[\[Omega],s,m ,a,\[Rho]]R'[\[Rho]]+B[\[Omega],s,m ,a,\[Rho]]R[\[Rho]];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Discretization*)
 
 
@@ -83,7 +87,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Radial Eigenvalues*)
 
 
@@ -104,7 +108,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 ]
 
 
-(* Compute a shifted eigenvalue *)
+(* CP comment: Computes the difference between the  radial and angular separation constant! *)
 \[Delta]\[Lambda][\[Omega]guess_,s_Integer,l_Integer,m_Integer,a_]:=Module[
 	{\[CapitalLambda]},
 		\[CapitalLambda]=SpinWeightedSpheroidalEigenvalue[s,l,m,a \[Omega]guess];
@@ -112,10 +116,12 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Newton Raphson solver*)
 
 
+(*CP commment: what the algorithm solves for is not the SpinWeightedSpheroidalEigenvalue, but the combination (SpinWeightedSpheroidalEigenvalue+2 m a \[Omega]guess- (a \[Omega]guess)^2) *)
+(*CP: what do we want to output here?*)
 QNMFrequency[s_Integer,l_Integer,m_Integer,a_,tol_:10^-6]:=Module[
 	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega]},
 		(* Check for real spin *)
@@ -152,6 +158,8 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_,tol_:10^-6]:=Module[
 (*Use the eigenvalue to calculate the eigenfunction*)
 
 
+(*CP comment: this is error prone: it takes in the QNM frequency, which the uses might give erroneously.. Maybe the two function are put together into 1, or the second one expands in content?*)
+(*CP comment: There should be an option: `Hyperboloidal' or `BL'*)
 QNMFunction[\[Omega]_,s_Integer,m_Integer,a_]:=Module[
 	{ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat},
 		(* Call the discretized system *)
