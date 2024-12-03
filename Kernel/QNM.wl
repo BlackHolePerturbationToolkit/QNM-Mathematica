@@ -57,8 +57,6 @@ Begin["`Private`"];
 
 
 M=1;(*re-instate at some point????*)
-prec=50;
-Nz=100;
 
 
 (* ::Subsection:: *)
