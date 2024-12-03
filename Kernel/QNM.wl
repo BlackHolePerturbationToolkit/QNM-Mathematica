@@ -73,7 +73,7 @@ Begin["`Private`"];
 M=1;(*re-instate at some point????*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Operator Functions*)
 
 
@@ -83,7 +83,7 @@ B[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=(a^2-16M^2)\[Omega]^2+2(m a +2 I s 
 M\[Rho][\[Omega]_,s_Integer,m_Integer,a_]:=-\[Rho]^2\[CapitalDelta][\[Rho],a]R''[\[Rho]]+A[\[Omega],s,m ,a,\[Rho]]R'[\[Rho]]+B[\[Omega],s,m ,a,\[Rho]]R[\[Rho]];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Discretization*)
 
 
@@ -97,7 +97,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Radial Eigenvalues*)
 
 
@@ -118,7 +118,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Eigenvalue difference*)
 
 
@@ -126,7 +126,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 \[Delta]\[Lambda][\[Omega]guess_,s_Integer,l_Integer,m_Integer,a_,NN_Integer]:=Module[
 	{\[CapitalLambda]},
 		\[CapitalLambda]=SpinWeightedSpheroidalEigenvalue[s,l,m,a \[Omega]guess];
-		-\[Lambda]r[\[Omega]guess,s,m,a,NN][[1]]+(\[CapitalLambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2)
+		SetPrecision[-\[Lambda]r[\[Omega]guess,s,m,a,NN][[1]]+(\[CapitalLambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2),50]
 ]
 
 
@@ -163,10 +163,11 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		
 		(* Iterate until tolerance is reached *)
 		Until[Norm[\[Delta]\[Omega]]<tol,
-			F=\[Delta]\[Lambda][\[Omega]guess, s,l, m, a,NN];
-			Fp=(\[Delta]\[Lambda][\[Omega]guess+\[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-\[Epsilon], s,l, m, a,NN])/(2 \[Epsilon])+(\[Delta]\[Lambda][\[Omega]guess+I \[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-I \[Epsilon], s,l, m, a,NN])/(2 \[Epsilon] I);
-			\[Omega]guess= \[Omega]guess-(\[Gamma] F)/Fp;
-			\[Delta]\[Omega]= -(\[Gamma] F)/Fp
+			Print["Eigenvalue: ", \[Omega]guess];
+			F=SetPrecision[\[Delta]\[Lambda][\[Omega]guess, s,l, m, a,NN],50];
+			Fp=SetPrecision[(\[Delta]\[Lambda][\[Omega]guess+\[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-\[Epsilon], s,l, m, a,NN])/(2 \[Epsilon])+(\[Delta]\[Lambda][\[Omega]guess+I \[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-I \[Epsilon], s,l, m, a,NN])/(2 \[Epsilon] I),50];
+			\[Omega]guess= SetPrecision[\[Omega]guess-(\[Gamma] F)/Fp,50];
+			\[Delta]\[Omega]= SetPrecision[-(\[Gamma] F)/Fp,50]
 		];
 		
 		(* Once result is obtained, return eigenvalue & separation constant *)
@@ -179,7 +180,7 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 (*Calculate radial function*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Define function options*)
 
 
