@@ -30,8 +30,9 @@ ClearAttributes[{QNMFrequency, QNMFunction}, {Protected, ReadProtected}];
 (*Usage messages*)
 
 
-QNMFrequency::usage = "QNMFrequency[s, l, m, n, a] computes the quasinormal mode frequncy";
-QNMFunction::usage = "QNMFunction[\[Omega],s,m,a] computes the radial eigenfunction associated with the eigenvalue \[Omega]"; 
+QNMFrequency::usage = "QNMFrequency[s, l, m, a] computes the quasinormal mode frequncy following arXiv:2202.03837";
+QNMFunction::usage = "QNMFunction[\[Omega],s,m,a] computes the radial eigenfunction associated with the eigenvalue \[Omega] in hyperboloidal coordinates"; 
+QNMode::usage = "QNM[s,l,m,a, coords] computes the frequency \[Omega] and radial eigenfunction, in either Hyperboloidal or BL coordinates"; 
 
 
 (* ::Subsection:: *)
@@ -55,11 +56,11 @@ Begin["`Private`"];
 (*CP comment: To do: currently just n=0. Generalise?*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Parameters*)
 
 
-(*CP: cleared this up*)
+(*CP: cleaned this up*)
 M=1;(*re-instate at some point????*)
 
 
@@ -108,6 +109,10 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 ]
 
 
+(* ::Subsection::Closed:: *)
+(*Eigenvalue difference*)
+
+
 (* CP comment: Computes the difference between the  radial and angular separation constant! *)
 \[Delta]\[Lambda][\[Omega]guess_,s_Integer,l_Integer,m_Integer,a_]:=Module[
 	{\[CapitalLambda]},
@@ -116,12 +121,11 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Newton Raphson solver*)
 
 
-(*CP commment: what the algorithm solves for is not the SpinWeightedSpheroidalEigenvalue, but the combination (SpinWeightedSpheroidalEigenvalue+2 m a \[Omega]guess- (a \[Omega]guess)^2) *)
-(*CP: what do we want to output here?*)
+(*CP commment: the algorithm solves for the separation constant, while SpinWeightedSpheroidalEigenvalue gives the Angular eigenvalue: SeparationConstant= (SpinWeightedSpheroidalEigenvalue+2 m a \[Omega]guess- (a \[Omega]guess)^2) *)
 QNMFrequency[s_Integer,l_Integer,m_Integer,a_,tol_:10^-6]:=Module[
 	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega]},
 		(* Check for real spin *)
@@ -146,7 +150,7 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_,tol_:10^-6]:=Module[
 		
 		(* Once result is obtained, return eigenvalue & separation constant *)
 		\[Lambda] = SpinWeightedSpheroidalEigenvalue[s,l,m,a \[Omega]guess];
-		<|"QNMfrequency"->\[Omega]guess,"SeparationConstant"->\[Lambda]|>
+		<|"QNMfrequency"->\[Omega]guess,"SeparationConstant"->\[Lambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2|>
 ]
 
 
@@ -158,10 +162,31 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_,tol_:10^-6]:=Module[
 (*Use the eigenvalue to calculate the eigenfunction*)
 
 
-(*CP comment: this is error prone: it takes in the QNM frequency, which the uses might give erroneously.. Maybe the two function are put together into 1, or the second one expands in content?*)
-(*CP comment: There should be an option: `Hyperboloidal' or `BL'*)
+(*CP comment: this is error prone: it takes in the QNM frequency, which the user might give erroneously..*)
+(*CP comment: conventions fixed \[CapitalDelta]^-s/r, \[Rho]=1/r see eq 6 in 2202.03837*)
 QNMFunction[\[Omega]_,s_Integer,m_Integer,a_]:=Module[
-	{ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat},
+	{ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat, Delta},
+		(* Call the discretized system *)
+		\[Rho]grida = \[Rho]grid[a];
+		dd1 = Dgrid[\[Rho]grida];
+		dd2 = DDgrid[\[Rho]grida];
+		(* Define discretization in terms of grids *)
+		DiscretizationRules={\[Rho]->\[Rho]grida,R''[\[Rho]]->dd2, 
+			R'[\[Rho]]->dd1, R[\[Rho]]->IdentityMatrix[Nz]};
+		(* Evaluate discretized operator *)
+		Mat=M\[Rho][\[Omega],s,m,a]/.DiscretizationRules;
+		(* Calculate the eigensystem given the eigenvalue *)
+		ef=Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1,2]];
+		Delta=Table[(\[Rho]grida[[i]]^2 a^2-2M \[Rho]grida[[i]]+1)/\[Rho]grida[[i]]^2 ,{i,1,Length[\[Rho]grida]}];
+		(* Return table of radial gridpoints and eigenfunction values *)
+		Table[{\[Rho]grida[[i]], Delta[[i]]^-s \[Rho]grida[[i]]  ef[[i]]},{i,1,Length[\[Rho]grida]}]
+]
+
+(*CP comment: this is a way around the problem above. For `BL' multiply with E^(-I \[Omega] h), h=-r-4M Log r= -1/\[Rho]+4M Log \[Rho]*)
+QNMode[s_Integer,l_integer,m_Integer,a_, coords_]:=Module[
+	{\[Omega], ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat,RadialProfile, Delta,h},
+		(* Get the frequency *)
+		\[Omega]=QNMFrequency[s,l,m,a,10^-6]["QNMfrequency"];
 		(* Call the discretized system *)
 		\[Rho]grida = \[Rho]grid[a];
 		dd1 = Dgrid[\[Rho]grida];
@@ -174,7 +199,12 @@ QNMFunction[\[Omega]_,s_Integer,m_Integer,a_]:=Module[
 		(* Calculate the eigensystem given the eigenvalue *)
 		ef=Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1,2]];
 		(* Return table of radial gridpoints and eigenfunction values *)
-		Table[{\[Rho]grida[[i]], ef[[i]]},{i,1,Length[\[Rho]grida]}]
+		Delta=Table[(\[Rho]grida[[i]]^2 a^2-2M \[Rho]grida[[i]]+1)/\[Rho]grida[[i]]^2 ,{i,1,Length[\[Rho]grida]}];
+		h=Table[-1/\[Rho]grida[[i]]+4 M Log[\[Rho]grida[[i]]]  ,{i,1,Length[\[Rho]grida]}];
+		
+		If[coords=="Hyperboloidal", RadialProfile=Table[{\[Rho]grida[[i]],Delta[[i]]^-s \[Rho]grida[[i]] ef[[i]]},{i,1,Length[\[Rho]grida]}]];
+		If[coords=="BL", RadialProfile=Table[{\[Rho]grida[[i]],Delta[[i]]^-s \[Rho]grida[[i]] Exp[-I \[Omega] h[[i]]] ef[[i]]},{i,1,Length[\[Rho]grida]}]];
+		<|"QNMfrequency"->\[Omega],"QNMRadialProfile"->RadialProfile|>
 ]
 
 
