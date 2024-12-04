@@ -127,7 +127,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 \[Delta]\[Lambda][\[Omega]guess_,s_Integer,l_Integer,m_Integer,a_,NN_Integer]:=Module[
 	{\[CapitalLambda]},
 		\[CapitalLambda]=SpinWeightedSpheroidalEigenvalue[s,l,m,a \[Omega]guess];
-		SetPrecision[-\[Lambda]r[\[Omega]guess,s,m,a,NN][[1]]+(\[CapitalLambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2),50]
+		SetPrecision[-\[Lambda]r[\[Omega]guess,s,m,a,NN][[1]]-(\[CapitalLambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2),50]
 ]
 
 
