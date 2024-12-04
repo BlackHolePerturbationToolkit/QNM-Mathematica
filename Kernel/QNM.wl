@@ -171,10 +171,10 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 			F=SetPrecision[\[Delta]\[Lambda][\[Omega]guess, s,l, m, a,NN],50];
 			Fp=SetPrecision[(\[Delta]\[Lambda][\[Omega]guess+\[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-\[Epsilon], s,l, m, a,NN])/(2 \[Epsilon])+(\[Delta]\[Lambda][\[Omega]guess+I \[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-I \[Epsilon], s,l, m, a,NN])/(2 \[Epsilon] I),50];
 			\[Omega]guess= SetPrecision[\[Omega]guess-(\[Gamma] F)/Fp,50];
-			\[Delta]\[Omega]= SetPrecision[-(\[Gamma] F)/Fp,50]
+			\[Delta]\[Omega]= SetPrecision[-(\[Gamma] F)/Fp,50];
 						
 			If[count > MAXITS, 
-				Message[QNMMode::convergence, \[Omega]guess;
+				Message[QNMMode::convergence, \[Omega]guess];
 				Return[$Failed];
 			];
 		];
@@ -182,7 +182,7 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		(* Once result is obtained, return eigenvalue & separation constant *)
 		\[Lambda] = SpinWeightedSpheroidalEigenvalue[s,l,m,a \[Omega]guess];
 		<|"QNMfrequency"->\[Omega]guess,"SeparationConstant"->\[Lambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2|>
-]
+];
 
 
 (* ::Section:: *)
