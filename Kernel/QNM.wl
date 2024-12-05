@@ -59,6 +59,13 @@ QNMMode::convergence = "Eigenvalue failed to converge to specified tolerance. Fi
 Begin["`Private`"];
 
 
+(* ::Subsection:: *)
+(*Global Debug Flag*)
+
+
+DEBUG=True;
+
+
 (* ::Section:: *)
 (*Calculate QNM Frequency*)
 
@@ -135,16 +142,16 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 (*Define function options*)
 
 
-Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100}
+Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100, "\!\(\*SubscriptBox[\(\[Omega]\), \(0\)]\)"->1}
 
 
-(* ::Subsection:: *)
+(* ::Section:: *)
 (*Newton Raphson solver*)
 
 
 (*CP commment: the algorithm solves for the separation constant, while SpinWeightedSpheroidalEigenvalue gives the Angular eigenvalue: SeparationConstant= (SpinWeightedSpheroidalEigenvalue+2 m a \[Omega]guess- (a \[Omega]guess)^2) *)
 QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
-	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega],tol,NN,MAXITS,count},
+	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega],tol,NN,MAXITS,count,monitor},
 		(* Check for real spin *)
 		If[!RealValuedNumberQ[a],
 		Message[QNMFrequency::real, a];
@@ -155,9 +162,13 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		tol = OptionValue["Tolerance"];
 		NN = OptionValue["Resolution"];
 		(* Debug *)
-		Print["Calculating QNMFrequency with tolerance ", N[tol], " for ", NN, " gridpoints."];
-		
-		\[Omega]guess = 1;
+		If[DEBUG,
+		Print["Calculating QNMFrequency with tolerance ", N[tol], " for ", NN, " gridpoints."]
+		];
+		\[Omega]guess=OptionValue["\!\(\*SubscriptBox[\(\[Omega]\), \(0\)]\)"];
+		If[DEBUG,
+		monitor = PrintTemporary["Eigenvalue: ", Dynamic[\[Omega]guess]];
+		];
 		\[Delta]\[Omega]=1;
 		\[Epsilon]=10^-8;(*better way?*)
 		\[Gamma]=1;(*allow this to change?*)
@@ -167,7 +178,6 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		count = 0;
 		Until[Norm[\[Delta]\[Omega]]<tol,
 			count += 1;
-			Print["Eigenvalue: ", \[Omega]guess];
 			F=SetPrecision[\[Delta]\[Lambda][\[Omega]guess, s,l, m, a,NN],50];
 			Fp=SetPrecision[(\[Delta]\[Lambda][\[Omega]guess+\[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-\[Epsilon], s,l, m, a,NN])/(2 \[Epsilon])+(\[Delta]\[Lambda][\[Omega]guess+I \[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-I \[Epsilon], s,l, m, a,NN])/(2 \[Epsilon] I),50];
 			\[Omega]guess= SetPrecision[\[Omega]guess-(\[Gamma] F)/Fp,50];
@@ -177,6 +187,9 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 				Message[QNMMode::convergence, \[Omega]guess];
 				Return[$Failed];
 			];
+		];
+		If[DEBUG,
+		NotebookDelete[monitor];
 		];
 		
 		(* Once result is obtained, return eigenvalue & separation constant *)
@@ -196,41 +209,23 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 Options[QNMMode] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"BL"}
 
 
-(*CP comment: this is error prone: it takes in the QNM frequency, which the user might give erroneously..*)
-
-(*QNMFunction[\[Omega]_,s_Integer,m_Integer,a_,OptionsPattern[]]:=Module[
-	{ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat, Delta},
-		(* Call the discretized system *)
-		\[Rho]grida = \[Rho]grid[a,NN];
-		dd1 = Dgrid[\[Rho]grida];
-		dd2 = DDgrid[\[Rho]grida];
-		(* Define discretization in terms of grids *)
-		DiscretizationRules={\[Rho]->\[Rho]grida,R''[\[Rho]]->dd2, 
-			R'[\[Rho]]->dd1, R[\[Rho]]->IdentityMatrix[NN]};
-		(* Evaluate discretized operator *)
-		Mat=M\[Rho][\[Omega],s,m,a]/.DiscretizationRules;
-		(* Calculate the eigensystem given the eigenvalue *)
-		ef=Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1,2]];
-		Delta=Table[(\[Rho]grida[[i]]^2 a^2-2M \[Rho]grida[[i]]+1)/\[Rho]grida[[i]]^2 ,{i,1,Length[\[Rho]grida]}];
-		(* Return table of radial gridpoints and eigenfunction values *)
-		Table[{\[Rho]grida[[i]], Delta[[i]]^(-s) \[Rho]grida[[i]]  ef[[i]]},{i,1,Length[\[Rho]grida]}]
-]*)
-
-
 (* ::Subsection:: *)
 (*Use the eigenvalue to calculate the eigenfunction*)
 
 
 (* Calculate the eigenvalue first, then solve for the radial profile *)
 QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
-	{\[Omega],ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat,RadialProfile,Delta,h,tol,NN,coords},
+	{\[Omega],ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat,RadialProfile,Delta,
+	DeltaTilde,h,tol,NN,coords},
 		(* Load options values *)
 		tol = OptionValue["Tolerance"];
 		NN = OptionValue["Resolution"];
 		coords = OptionValue["Coordinates"];
 		
 		(* Debug *)
-		Print["Computing QNMMode with tolerance ", N[tol], " resolution ", NN, " and coordinates ", coords];
+		If[DEBUG,
+			Print["Computing QNMMode with tolerance ", N[tol], " resolution ", NN, " and coordinates ", coords];
+		];
 		
 		If[coords != "BL" && coords != "Hyperboloidal",
 		Message[QNMMode::coords, coords];
@@ -257,14 +252,27 @@ QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		
 		(* Generate table of radial gridpoints and eigenfunction values *)
 		(*CP comment: conventions fixed \[CapitalDelta]^-s/r, \[Rho]=1/r see eq 6 in 2202.03837*)
-		Delta=Table[(\[Rho]grida[[i]]^2 a^2-2M \[Rho]grida[[i]]+1)/\[Rho]grida[[i]]^2 ,{i,1,Length[\[Rho]grida]}];
-		h=Table[-1/\[Rho]grida[[i]]+4 M Log[\[Rho]grida[[i]]]  ,{i,1,Length[\[Rho]grida]}];
+		(* BC: to control division by zero, do not include 1/\[Rho]^2 factor *)
+		(*Delta=Table[(\[Rho]grida[[i]]^2 a^2-2M \[Rho]grida[[i]]+1)/\[Rho]grida[[i]]^2 ,{i,1,Length[\[Rho]grida]}];*)
+		DeltaTilde=Table[\[Rho]grida[[i]]^2 a^2-2M \[Rho]grida[[i]]+1,{i,1,Length[\[Rho]grida]}];
+		h=Table[-1/\[Rho]grida[[i]]+4 M Log[\[Rho]grida[[i]]],{i,1,Length[\[Rho]grida]}];
+		If[DEBUG,
+			Print["Height function: ", h];
+			Print["DeltaTilde: ", DeltaTilde];
+		];
 		
 		(* Calculate for specified coordinates *)
 		(*CP comment: this is a way around the problem above. For `BL' multiply with E^(-I \[Omega] h), h=-r-4M Log r= -1/\[Rho]+4M Log \[Rho]*)
-		If[coords=="Hyperboloidal", RadialProfile=Table[{\[Rho]grida[[i]],Delta[[i]]^(-s) \[Rho]grida[[i]] ef[[i]]},{i,1,Length[\[Rho]grida]}]];
-		If[coords=="BL", RadialProfile=Table[{\[Rho]grida[[i]],Delta[[i]]^(-s) \[Rho]grida[[i]] Exp[-I \[Omega] h[[i]]] ef[[i]]},{i,1,Length[\[Rho]grida]}]];
-		
+		(* BC: Collect factors of \[Rho] in the final expression *)
+		(*If[coords=="Hyperboloidal", 
+			RadialProfile = Table[{\[Rho]grida[[i]],Delta[[i]]^(-s) \[Rho]grida[[i]] ef[[i]]},{i,2,Length[\[Rho]grida]}]]];
+		If[coords=="BL", 
+			RadialProfile = Join[{{0.0,0.0}},Table[{\[Rho]grida[[i]],Delta[[i]]^(-s) \[Rho]grida[[i]]*Exp[-I \[Omega] h[[i]]]*ef[[i]]},{i,2,Length[\[Rho]grida]}]]];
+*)		
+		If[coords=="Hyperboloidal", 
+			RadialProfile = Table[{\[Rho]grida[[i]],DeltaTilde[[i]]^(-s)*(\[Rho]grida[[i]])^(2*s+1)*ef[[i]]},{i,1,Length[\[Rho]grida]}];
+		If[coords=="BL", 
+			RadialProfile = Table[{\[Rho]grida[[i]],DeltaTilde[[i]]^(-s)*(\[Rho]grida[[i]])^(2*s+1)*ef[[i]]*Exp[-I*\[Omega]*h[[i]]]},{i,2,Length[\[Rho]grida]}]]];
 		(* Return association *)
 		<|"QNMfrequency"->\[Omega],"QNMRadialProfile"->RadialProfile|>
 ]
