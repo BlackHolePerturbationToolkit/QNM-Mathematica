@@ -271,9 +271,9 @@ QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 *)
 		Switch[coords,
 		"Hyperboloidal",
-			RadialProfile = Table[{\[Rho]grida[[i]],DeltaTilde[[i]]^(-s)*(\[Rho]grida[[i]])^(2*s+1)*ef[[i]]}, {i,1,Length[\[Rho]grida]}];,
+			RadialProfile = Transpose[{\[Rho]grida,ef/ef[[-1]]}];,
 		"BL",
-			RadialProfile = Table[{\[Rho]grida[[i]],DeltaTilde[[i]]^(-s)*(\[Rho]grida[[i]])^(2*s+1)*ef[[i]]*Exp[-I*\[Omega]*h[[i]]]}, {i,2,Length[\[Rho]grida]}];,
+			RadialProfile = Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h]}];,
 		_,
 			Message[QNMMode::coords, coords];
 			Return[$Failed];
