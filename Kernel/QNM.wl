@@ -268,11 +268,17 @@ QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 			RadialProfile = Table[{\[Rho]grida[[i]],Delta[[i]]^(-s) \[Rho]grida[[i]] ef[[i]]},{i,2,Length[\[Rho]grida]}]]];
 		If[coords=="BL", 
 			RadialProfile = Join[{{0.0,0.0}},Table[{\[Rho]grida[[i]],Delta[[i]]^(-s) \[Rho]grida[[i]]*Exp[-I \[Omega] h[[i]]]*ef[[i]]},{i,2,Length[\[Rho]grida]}]]];
-*)		
-		If[coords=="Hyperboloidal", 
-			RadialProfile = Table[{\[Rho]grida[[i]],DeltaTilde[[i]]^(-s)*(\[Rho]grida[[i]])^(2*s+1)*ef[[i]]},{i,1,Length[\[Rho]grida]}];
-		If[coords=="BL", 
-			RadialProfile = Table[{\[Rho]grida[[i]],DeltaTilde[[i]]^(-s)*(\[Rho]grida[[i]])^(2*s+1)*ef[[i]]*Exp[-I*\[Omega]*h[[i]]]},{i,2,Length[\[Rho]grida]}]]];
+*)
+		Switch[coords,
+		"Hyperboloidal",
+			RadialProfile = Table[{\[Rho]grida[[i]],DeltaTilde[[i]]^(-s)*(\[Rho]grida[[i]])^(2*s+1)*ef[[i]]}, {i,1,Length[\[Rho]grida]}];,
+		"BL",
+			RadialProfile = Table[{\[Rho]grida[[i]],DeltaTilde[[i]]^(-s)*(\[Rho]grida[[i]])^(2*s+1)*ef[[i]]*Exp[-I*\[Omega]*h[[i]]]}, {i,2,Length[\[Rho]grida]}];,
+		_,
+			Message[QNMMode::coords, coords];
+			Return[$Failed];
+		];
+
 		(* Return association *)
 		<|"QNMfrequency"->\[Omega],"QNMRadialProfile"->RadialProfile|>
 ]
