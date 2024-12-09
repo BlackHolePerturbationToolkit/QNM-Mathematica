@@ -216,7 +216,7 @@ Options[QNMMode] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"BL"}
 (* Calculate the eigenvalue first, then solve for the radial profile *)
 QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 	{\[Omega],ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat,RadialProfile,Delta,
-	DeltaTilde,h,tol,NN,coords},
+	DeltaTilde,h,h\[Phi],tol,NN,coords},
 		(* Load options values *)
 		tol = OptionValue["Tolerance"];
 		NN = OptionValue["Resolution"];
@@ -254,12 +254,6 @@ QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		(*CP comment: conventions fixed \[CapitalDelta]^-s/r, \[Rho]=1/r see eq 6 in 2202.03837*)
 		(* BC: to control division by zero, do not include 1/\[Rho]^2 factor *)
 		(*Delta=Table[(\[Rho]grida[[i]]^2 a^2-2M \[Rho]grida[[i]]+1)/\[Rho]grida[[i]]^2 ,{i,1,Length[\[Rho]grida]}];*)
-		DeltaTilde=Table[\[Rho]grida[[i]]^2 a^2-2M \[Rho]grida[[i]]+1,{i,1,Length[\[Rho]grida]}];
-		h=Table[-1/\[Rho]grida[[i]]+4 M Log[\[Rho]grida[[i]]],{i,1,Length[\[Rho]grida]}];
-		If[DEBUG,
-			Print["Height function: ", h];
-			Print["DeltaTilde: ", DeltaTilde];
-		];
 		
 		(* Calculate for specified coordinates *)
 		(*CP comment: this is a way around the problem above. For `BL' multiply with E^(-I \[Omega] h), h=-r-4M Log r= -1/\[Rho]+4M Log \[Rho]*)
@@ -273,7 +267,9 @@ QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		"Hyperboloidal",
 			RadialProfile = Transpose[{\[Rho]grida,ef/ef[[-1]]}];,
 		"BL",
-			RadialProfile = Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h]}];,
+			h=-(1/\[Rho]grida)+(2 M^2 ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2]+M Log[a^2+1/\[Rho]grida^2-(2 M)/\[Rho]grida]-4 M Log[1/\[Rho]grida];
+			h\[Phi]=(a ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2];
+			RadialProfile = Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h+I*m*h\[Phi]]}];,
 		_,
 			Message[QNMMode::coords, coords];
 			Return[$Failed];
