@@ -1,0 +1,12 @@
+#####################################
+#### Teukolsky Quasinormal Modes ####
+#####################################
+
+
+FUNCTIONALITY
+- Generate quasinormal frequencies beyond fundamental mode
+- Integrate QNM table lookup for better seed value
+
+
+INTERFACE
+- Unify interface with other methods in BHPT
