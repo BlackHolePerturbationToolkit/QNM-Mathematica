@@ -30,16 +30,16 @@ ClearAttributes[{QNMFrequency, QNMMode}, {Protected, ReadProtected}];
 (*Usage messages*)
 
 
-QNMFrequency::usage = "QNMFrequency[s, l, m, a, opts] computes the fundamental quasinormal frequency following arXiv:2202.03837. Options are:
+QNMFrequency::usage = "QNMFrequency[s, l, m, n, a, opts] computes the fundamental quasinormal frequency following arXiv:2202.03837. Options are:
 \t\[Bullet] \"Tolerance\" -> \!\(\*SuperscriptBox[\(10\), \(-6\)]\) (default): Tolerance for Newton Raphson solver
 \t\[Bullet] \"Resolution\" -> 100 (default): Spectral resolution
 Returns: <| \"QNMfrequency\" -> \[Omega], \"SeparationConstant\" -> \[ScriptCapitalS] |>";
 
 
-QNMMode::usage = "QNMMode[s, l, m, a, opts] computes the fundamental quasinormal mode frequency \[Omega] and corresponding radial eigenfunction following arXiv:2202.03837. Options are:
+QNMMode::usage = "QNMMode[s, l, m, n, a, opts] computes the fundamental quasinormal mode frequency \[Omega] and corresponding radial eigenfunction following arXiv:2202.03837. Options are:
 \t\[Bullet] \"Tolerance\" -> \!\(\*SuperscriptBox[\(10\), \(-6\)]\) (default): Tolerance for Newton Raphson solver
 \t\[Bullet] \"Resolution\" -> 100 (default): Spectral resolution
-\t\[Bullet] \"Coordinates\" -> {\"BL\" (default), \"Hyperboloidal\"}: Choice of output coordinates
+\t\[Bullet] \"Coordinates\" -> {\"BL\", \"Boyer-Lindquist\", \"Hyperboloidal (default) \"}: Choice of output coordinates
 Returns: <| \"QNMfrequency\" -> \[Omega], \"Radial Function\" -> F |>";
 
 
@@ -48,7 +48,7 @@ Returns: <| \"QNMfrequency\" -> \[Omega], \"Radial Function\" -> F |>";
 
 
 QNMFrequency::real = "Only real values of a are allowed, but a=`1`.";
-QNMMode::coords = "Coordinate options are either \"Hyperboloidal\" or \"BL\", but got `1`";
+QNMMode::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal, but got `1`";
 QNMMode::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`";
 
 
@@ -63,7 +63,7 @@ Begin["`Private`"];
 (*Global Debug Flag*)
 
 
-DEBUG=True;
+DEBUG=False;
 
 
 (* ::Section:: *)
@@ -77,8 +77,7 @@ DEBUG=True;
 (*Parameters*)
 
 
-(*CP: cleaned this up*)
-M=1;(*re-instate at some point????*)
+M=1;
 
 
 (* ::Subsection:: *)
@@ -142,7 +141,8 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 (*Define function options*)
 
 
-Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100, "\!\(\*SubscriptBox[\(\[Omega]\), \(0\)]\)"->1}
+Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100, "\[Omega]0"->1};
+Default[QNMFrequency] = 0;
 
 
 (* ::Section:: *)
@@ -150,7 +150,7 @@ Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100, "\!\(\*Subscript
 
 
 (*CP commment: the algorithm solves for the separation constant, while SpinWeightedSpheroidalEigenvalue gives the Angular eigenvalue: SeparationConstant= (SpinWeightedSpheroidalEigenvalue+2 m a \[Omega]guess- (a \[Omega]guess)^2) *)
-QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
+QNMFrequency[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Module[
 	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega],tol,NN,MAXITS,count,monitor},
 		(* Check for real spin *)
 		If[!RealValuedNumberQ[a],
@@ -165,7 +165,7 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		If[DEBUG,
 		Print["Calculating QNMFrequency with tolerance ", N[tol], " for ", NN, " gridpoints."]
 		];
-		\[Omega]guess=OptionValue["\!\(\*SubscriptBox[\(\[Omega]\), \(0\)]\)"];
+		\[Omega]guess=OptionValue["\[Omega]0"];
 		If[DEBUG,
 		monitor = PrintTemporary["Eigenvalue: ", Dynamic[\[Omega]guess]];
 		];
@@ -198,6 +198,13 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 ];
 
 
+(* ::Subsection:: *)
+(*Overload for fewer arguments*)
+
+
+QNMFrequency[s_Integer,l_Integer,m_Integer,a_,opts:OptionsPattern[]] := QNMFrequency[s,l,m,Default[QNMFrequency],a,opts];
+
+
 (* ::Section:: *)
 (*Calculate radial function*)
 
@@ -206,7 +213,8 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 (*Define function options*)
 
 
-Options[QNMMode] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"BL"}
+Options[QNMMode] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"Hyperboloidal"};
+Default[QNMMode] = 0;
 
 
 (* ::Subsection:: *)
@@ -214,7 +222,7 @@ Options[QNMMode] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"BL"}
 
 
 (* Calculate the eigenvalue first, then solve for the radial profile *)
-QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
+QNMMode[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Module[
 	{\[Omega],ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat,RadialProfile,Delta,
 	DeltaTilde,h,h\[Phi],tol,NN,coords},
 		(* Load options values *)
@@ -227,13 +235,13 @@ QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 			Print["Computing QNMMode with tolerance ", N[tol], " resolution ", NN, " and coordinates ", coords];
 		];
 		
-		If[coords != "BL" && coords != "Hyperboloidal",
+		If[coords != "BL" && coords != "Boyer-Lindquist" && coords != "BoyerLindquist" && coords != "Hyperboloidal",
 		Message[QNMMode::coords, coords];
 		Return[$Failed];
 		];
 		
 		(* Get the frequency *)
-		\[Omega]=QNMFrequency[s,l,m,a,"Tolerance"->tol, "Resolution"->NN]["QNMfrequency"];
+		\[Omega]=QNMFrequency[s,l,m,0,a,"Tolerance"->tol, "Resolution"->NN]["QNMfrequency"];
 		
 		(* Call the discretized system *)
 		\[Rho]grida = \[Rho]grid[a,NN];
@@ -250,23 +258,10 @@ QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		(* Calculate the eigensystem given the eigenvalue *)
 		ef=Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1,2]];
 		
-		(* Generate table of radial gridpoints and eigenfunction values *)
-		(*CP comment: conventions fixed \[CapitalDelta]^-s/r, \[Rho]=1/r see eq 6 in 2202.03837*)
-		(* BC: to control division by zero, do not include 1/\[Rho]^2 factor *)
-		(*Delta=Table[(\[Rho]grida[[i]]^2 a^2-2M \[Rho]grida[[i]]+1)/\[Rho]grida[[i]]^2 ,{i,1,Length[\[Rho]grida]}];*)
-		
-		(* Calculate for specified coordinates *)
-		(*CP comment: this is a way around the problem above. For `BL' multiply with E^(-I \[Omega] h), h=-r-4M Log r= -1/\[Rho]+4M Log \[Rho]*)
-		(* BC: Collect factors of \[Rho] in the final expression *)
-		(*If[coords=="Hyperboloidal", 
-			RadialProfile = Table[{\[Rho]grida[[i]],Delta[[i]]^(-s) \[Rho]grida[[i]] ef[[i]]},{i,2,Length[\[Rho]grida]}]]];
-		If[coords=="BL", 
-			RadialProfile = Join[{{0.0,0.0}},Table[{\[Rho]grida[[i]],Delta[[i]]^(-s) \[Rho]grida[[i]]*Exp[-I \[Omega] h[[i]]]*ef[[i]]},{i,2,Length[\[Rho]grida]}]]];
-*)
 		Switch[coords,
 		"Hyperboloidal",
 			RadialProfile = Transpose[{\[Rho]grida,ef/ef[[-1]]}];,
-		"BL",
+		"BL" | "BoyerLindquist" | "Boyer\[Dash]Lindquist" ,
 			h=-(1/\[Rho]grida)+(2 M^2 ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2]+M Log[a^2+1/\[Rho]grida^2-(2 M)/\[Rho]grida]-4 M Log[1/\[Rho]grida];
 			h\[Phi]=(a ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2];
 			RadialProfile = Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h+I*m*h\[Phi]]}];,
@@ -276,8 +271,39 @@ QNMMode[s_Integer,l_Integer,m_Integer,a_, OptionsPattern[]]:=Module[
 		];
 
 		(* Return association *)
-		<|"QNMfrequency"->\[Omega],"QNMRadialProfile"->RadialProfile|>
+		<|"QNMfrequency"->\[Omega],"QNMRadialProfile"->Interpolation[RadialProfile]|>
 ]
+
+
+(* ::Subsection:: *)
+(*Overload for fewer arguments*)
+
+
+QNMMode[s_Integer,l_Integer,m_Integer, a_, opts:OptionsPattern[]] := QNMMode[s,l,m,Default[QNMMode],a,opts];
+
+
+(* ::Section:: *)
+(*Interface*)
+
+
+QNM /:
+MakeBoxes[tm: QNMMode[assoc_], form:(StandardForm|TraditionalForm)] :=
+ Module[{summary, extended},
+ (* Summary data: s,l,m,n,\[Omega] *)
+  summary = {Row[{
+                  BoxForm`SummaryItem[{"\[Omega]: ", assoc["QNMfrequency"]}]}]};
+
+
+  extended = {BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"]}]};
+  BoxForm`ArrangeSummaryBox[
+    QNM,
+    tm,
+    None,
+    summary,
+    extended,
+    form
+  ]
+];
 
 
 (* ::Section:: *)
