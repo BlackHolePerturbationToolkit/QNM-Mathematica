@@ -326,7 +326,7 @@ QNMMode[s_Integer,l_Integer,m_Integer, a_, opts:OptionsPattern[]] := QNMMode[s,l
 (*Interface*)
 
 
-QNM /:
+QNMMode /:
 MakeBoxes[tm: QNMMode[assoc_], form:(StandardForm|TraditionalForm)] :=
  Module[{summary, extended},
  (* Summary data: s,l,m,n,\[Omega] *)
@@ -336,7 +336,7 @@ MakeBoxes[tm: QNMMode[assoc_], form:(StandardForm|TraditionalForm)] :=
 
   extended = {BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"]}]};
   BoxForm`ArrangeSummaryBox[
-    QNM,
+    QNMMode,
     tm,
     None,
     summary,
