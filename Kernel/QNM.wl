@@ -14,7 +14,9 @@
 
 BeginPackage["QNM`",
   {
-  "SpinWeightedSpheroidalHarmonics`"
+  "SpinWeightedSpheroidalHarmonics`",
+  "Teukolsky`",
+  "Teukolsky`TeukolskyRadial`"
   }
 ];
 
@@ -90,6 +92,17 @@ QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] := QNMFrequency
     ret = $Failed;
   ];
   ret
+];
+
+
+(* ::Section::Closed:: *)
+(*Calculate QNM frequency by finding zero of incidence amplitude*)
+
+
+QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, a_, \[Omega]guess_] :=
+ Module[{\[Omega]QNM, inInc},
+  inInc[\[Omega]_?NumericQ] := TeukolskyRadial[s, l, m, a, \[Omega], Method -> "MST"]["In"]["Amplitudes"]["Incidence"];
+  \[Omega]QNM /. FindRoot[inInc[\[Omega]QNM], {\[Omega]QNM, \[Omega]guess}]
 ];
 
 
