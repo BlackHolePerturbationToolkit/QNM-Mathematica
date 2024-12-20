@@ -1,6 +1,7 @@
 import numpy as np 
 import qnm
 import pickle
+import h5py
 
 #Get valid m values for a given l_max
 def m_from_l(lmax):
@@ -8,25 +9,22 @@ def m_from_l(lmax):
 
 #Load the data
 qnm.download_data()
-data_dir = qnm.cached.get_cachedir() / 'data'
-
-s_vals =["-2","-1"]
-l_vals = [str(i) for i in range(8)]
-n_vals = [str(i) for i in range(6)]
+data_dir = qnm.cached.get_cachedir() / "data"
 
 output = 0
 
-for l in l_vals:
-    print(f"This is l={l}")
-    m_vals = m_from_l(int(l))
-    for m in m_vals:
-        for n in n_vals:
-            for s in s_vals:
-                file_loc = f"{f_loc}s{s}_l{l}_m{m}_n{n}.pickle"
-                with open(file_loc ,"rb") as f:
-                    x = pickle.load(f)
-                    out = [["a","re_omega","im_omega"]]
-                    for a,omega in zip(x.a,x.omega):
-                        out.append([a,omega.real,omega.imag])
-                    if output:
-                        np.savetxt(f"data_as_txt/s{s}_l{l}_m{m}_n{n}.txt",np.array(out),fmt="%s",delimiter=",")
+for s in [-2, -1]:
+  with h5py.File(f"QNM_s{s}.h5", 'w') as qnm_h5:
+    qnm_h5.attrs["s"] = s
+
+    for n in range(0,7):
+      for l in range(abs(s),8):
+        for m in range(-l,l+1):
+          print("Processing: ", s, n, l, m)
+          try:
+            with open(data_dir / f"s{s}_l{l}_m{m}_n{n}.pickle", "rb") as f:
+              qnmdata = pickle.load(f)
+              qnm_h5.create_dataset(f"l{l}/m{m}/n{n}/omega", data=qnmdata.omega, shuffle=True, compression='gzip', compression_opts=6, track_times=False)
+              qnm_h5.create_dataset(f"l{l}/m{m}/n{n}/a", data=qnmdata.a, shuffle=True, compression='gzip', compression_opts=6, track_times=False)
+          except:
+            print("Failed to create dataset, skipping.")
