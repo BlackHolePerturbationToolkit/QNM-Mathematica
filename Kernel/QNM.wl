@@ -47,6 +47,7 @@ Returns: <| \"QNMfrequency\" -> \[Omega], \"Radial Function\" -> F |>";
 (*Error messages*)
 
 
+QNMFrequency::nointerp = "Interpolation data not available for s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMFrequency::real = "Only real values of a are allowed, but a=`1`.";
 QNMMode::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal, but got `1`";
 QNMMode::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`";
@@ -64,6 +65,32 @@ Begin["`Private`"];
 
 
 DEBUG=False;
+
+
+(* ::Section::Closed:: *)
+(*Interpolation of tabulated QNM frequencies*)
+
+
+$QNMInstallationDirectory = FileNameDrop[FindFile["QNM`"], -2];
+$QNMDataDirectory = FileNameJoin[{$QNMInstallationDirectory, "Data"}];
+
+
+ClearAll[QNMFrequencyInterpolation];
+
+Options[QNMFrequencyInterpolation] = Options[Interpolation];
+
+QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] := QNMFrequencyInterpolation[s, l, m, n] =
+ Module[{h5file, dataset, data, ret},
+  h5file = FileNameJoin[{$QNMDataDirectory, "QNM_s"<>ToString[s]<>".h5"}];
+  dataset = "/l"<>ToString[l]<>"/m"<>ToString[m]<>"/n"<>ToString[n];
+  Quiet[data = Import[h5file, {"Datasets", dataset}, "ComplexKeys"->{"r", "i"}];, {Import::general, Import::noelem}];
+  If[MatchQ[data, <|"a"->_, "omega"->_|>],
+    ret = Interpolation[Transpose[Lookup[data, {"a","omega"}]], opts];,
+    Message[QNMFrequency::nointerp, s, l, m, n];
+    ret = $Failed;
+  ];
+  ret
+];
 
 
 (* ::Section:: *)
