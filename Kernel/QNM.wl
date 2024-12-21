@@ -25,7 +25,7 @@ BeginPackage["QNM`",
 (*Unprotect symbols*)
 
 
-ClearAttributes[{QNMFrequency, QNMMode, QNMRadialFunction}, {Protected, ReadProtected}];
+ClearAttributes[{QNMFrequency, QNMRadial, QNMRadialFunction}, {Protected, ReadProtected}];
 
 
 (* ::Subsection::Closed:: *)
@@ -38,7 +38,7 @@ QNMFrequency::usage = "QNMFrequency[s, l, m, n, a, opts] computes the fundamenta
 Returns: <| \"QNMfrequency\" -> \[Omega], \"SeparationConstant\" -> \[ScriptCapitalS] |>";
 
 
-QNMMode::usage = "QNMMode[s, l, m, n, a, opts] computes the fundamental quasinormal mode frequency \[Omega] and corresponding radial eigenfunction following arXiv:2202.03837. Options are:
+QNMRadial::usage = "QNMRadial[s, l, m, n, a, opts] computes the fundamental quasinormal mode frequency \[Omega] and corresponding radial eigenfunction following arXiv:2202.03837. Options are:
 \t\[Bullet] \"Tolerance\" -> \!\(\*SuperscriptBox[\(10\), \(-6\)]\) (default): Tolerance for Newton Raphson solver
 \t\[Bullet] \"Resolution\" -> 100 (default): Spectral resolution
 \t\[Bullet] \"Coordinates\" -> {\"BL\", \"Boyer-Lindquist\", \"Hyperboloidal (default) \"}: Choice of output coordinates
@@ -54,8 +54,8 @@ QNMRadialFunction::usage = "QNMRadialFunction[...] is an object representing a q
 
 QNMFrequency::nointerp = "Interpolation data not available for s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMFrequency::real = "Only real values of a are allowed, but a=`1`.";
-QNMMode::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal, but got `1`";
-QNMMode::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`";
+QNMRadial::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal, but got `1`";
+QNMRadial::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`";
 QNMRadialFunction::dmval = "Radius `1` lies outside the computational domain.";
 
 
@@ -228,7 +228,7 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:
 			\[Delta]\[Omega]= SetPrecision[-(\[Gamma] F)/Fp,50];
 						
 			If[count > MAXITS, 
-				Message[QNMMode::convergence, \[Omega]guess];
+				Message[QNMRadial::convergence, \[Omega]guess];
 				Return[$Failed];
 			];
 		];
@@ -261,8 +261,8 @@ rm[a_,M_] := M-Sqrt[M^2-a^2];
 (*Define function options*)
 
 
-Options[QNMMode] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"Hyperboloidal"};
-Default[QNMMode] = 0;
+Options[QNMRadial] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"Hyperboloidal"};
+Default[QNMRadial] = 0;
 
 
 (* ::Subsection::Closed:: *)
@@ -270,7 +270,7 @@ Default[QNMMode] = 0;
 
 
 (* Calculate the eigenvalue first, then solve for the radial profile *)
-QNMMode[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Module[
+QNMRadial[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Module[
 	{\[Omega],ev,ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat,RadialFunction,Delta,
 	DeltaTilde,h,h\[Phi],tol,NN,coords},
 		(* Load options values *)
@@ -280,11 +280,11 @@ QNMMode[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Modu
 		
 		(* Debug *)
 		If[DEBUG,
-			Print["Computing QNMMode with tolerance ", N[tol], " resolution ", NN, " and coordinates ", coords];
+			Print["Computing QNMRadial with tolerance ", N[tol], " resolution ", NN, " and coordinates ", coords];
 		];
 		
 		If[coords != "BL" && coords != "Boyer-Lindquist" && coords != "BoyerLindquist" && coords != "Hyperboloidal",
-		Message[QNMMode::coords, coords];
+		Message[QNMRadial::coords, coords];
 		Return[$Failed];
 		];
 		
@@ -314,7 +314,7 @@ QNMMode[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Modu
 			h\[Phi]=(a ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2];
 			RadialFunction = Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h+I*m*h\[Phi]]}]];,
 		_,
-			Message[QNMMode::coords, coords];
+			Message[QNMRadial::coords, coords];
 			Return[$Failed];
 		];
 
@@ -330,7 +330,7 @@ QNMMode[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Modu
 (*Overload for fewer arguments*)
 
 
-QNMMode[s_Integer,l_Integer,m_Integer, a_, opts:OptionsPattern[]] := QNMMode[s,l,m,Default[QNMMode],a,opts];
+QNMRadial[s_Integer,l_Integer,m_Integer, a_, opts:OptionsPattern[]] := QNMRadial[s,l,m,Default[QNMRadial],a,opts];
 
 
 (* ::Section::Closed:: *)
@@ -428,7 +428,7 @@ Derivative[n_Integer/;n>1][qnmrf:(QNMRadialFunction[s_, l_, m_, a_, \[Omega]_, a
 (*Protect symbols*)
 
 
-SetAttributes[{QNMFrequency, QNMMode, QNMRadialFunction}, {Protected, ReadProtected}];
+SetAttributes[{QNMFrequency, QNMRadial, QNMRadialFunction}, {Protected, ReadProtected}];
 
 
 (* ::Subsection::Closed:: *)
