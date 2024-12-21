@@ -25,7 +25,7 @@ BeginPackage["QNM`",
 (*Unprotect symbols*)
 
 
-ClearAttributes[{QNMFrequency, QNMMode}, {Protected, ReadProtected}];
+ClearAttributes[{QNMFrequency, QNMMode, QNMRadialFunction}, {Protected, ReadProtected}];
 
 
 (* ::Subsection:: *)
@@ -45,6 +45,9 @@ QNMMode::usage = "QNMMode[s, l, m, n, a, opts] computes the fundamental quasinor
 Returns: <| \"QNMfrequency\" -> \[Omega], \"Radial Function\" -> F |>";
 
 
+QNMRadialFunction::usage = "QNMRadialFunction[...] is an object representing a quasinormal mode solution to the radial Teukolsky equation.";
+
+
 (* ::Subsection:: *)
 (*Error messages*)
 
@@ -53,6 +56,7 @@ QNMFrequency::nointerp = "Interpolation data not available for s=`1`, l=`2`, m=`
 QNMFrequency::real = "Only real values of a are allowed, but a=`1`.";
 QNMMode::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal, but got `1`";
 QNMMode::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`";
+QNMRadialFunction::dmval = "Radius `1` lies outside the computational domain.";
 
 
 (* ::Subsection:: *)
@@ -249,6 +253,10 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_,opts:OptionsPattern[]] := QNMFrequ
 (*Calculate radial function*)
 
 
+rp[a_,M_] := M+Sqrt[M^2-a^2];
+rm[a_,M_] := M-Sqrt[M^2-a^2];
+
+
 (* ::Subsection:: *)
 (*Define function options*)
 
@@ -263,7 +271,7 @@ Default[QNMMode] = 0;
 
 (* Calculate the eigenvalue first, then solve for the radial profile *)
 QNMMode[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Module[
-	{\[Omega],ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat,RadialProfile,Delta,
+	{\[Omega],ev,ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat,RadialFunction,Delta,
 	DeltaTilde,h,h\[Phi],tol,NN,coords},
 		(* Load options values *)
 		tol = OptionValue["Tolerance"];
@@ -296,22 +304,25 @@ QNMMode[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Modu
 		Mat=M\[Rho][\[Omega],s,m,a]/.DiscretizationRules;
 		
 		(* Calculate the eigensystem given the eigenvalue *)
-		ef=Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1,2]];
+		{ev,ef}=Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1]];
 		
 		Switch[coords,
 		"Hyperboloidal",
-			RadialProfile = Transpose[{\[Rho]grida,ef/ef[[-1]]}];,
+			RadialFunction = Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]]}]];,
 		"BL" | "BoyerLindquist" | "Boyer\[Dash]Lindquist" ,
 			h=-(1/\[Rho]grida)+(2 M^2 ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2]+M Log[a^2+1/\[Rho]grida^2-(2 M)/\[Rho]grida]-4 M Log[1/\[Rho]grida];
 			h\[Phi]=(a ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2];
-			RadialProfile = Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h+I*m*h\[Phi]]}];,
+			RadialFunction = Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h+I*m*h\[Phi]]}]];,
 		_,
 			Message[QNMMode::coords, coords];
 			Return[$Failed];
 		];
 
 		(* Return association *)
-		<|"QNMfrequency"->\[Omega],"QNMRadialProfile"->Interpolation[RadialProfile]|>
+		QNMRadialFunction[<|"s" -> s, "l" -> l, "m" -> m, "n" -> n, "a" -> a, "\[Omega]" -> \[Omega], "Eigenvalue" -> ev,
+		  "Method" -> "SpectralHyperboloidal", "RadialFunction" -> RadialFunction,
+		  "Coordinates" -> coords, "Domain" -> {rp[a, 1], \[Infinity]}
+		  |>]
 ]
 
 
@@ -323,26 +334,89 @@ QNMMode[s_Integer,l_Integer,m_Integer, a_, opts:OptionsPattern[]] := QNMMode[s,l
 
 
 (* ::Section:: *)
-(*Interface*)
+(*QNMRadialFunction*)
 
 
-QNMMode /:
-MakeBoxes[tm: QNMMode[assoc_], form:(StandardForm|TraditionalForm)] :=
+(* ::Subsection::Closed:: *)
+(*Output format*)
+
+
+QNMRadialFunction /:
+MakeBoxes[qnmrf: QNMRadialFunction[assoc_], form:(StandardForm|TraditionalForm)] :=
  Module[{summary, extended},
- (* Summary data: s,l,m,n,\[Omega] *)
-  summary = {Row[{
-                  BoxForm`SummaryItem[{"\[Omega]: ", assoc["QNMfrequency"]}]}]};
-
-
-  extended = {BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"]}]};
+  summary = {Row[{BoxForm`SummaryItem[{"s: ", assoc["s"]}], "  ",
+                  BoxForm`SummaryItem[{"l: ", assoc["l"]}], "  ",
+                  BoxForm`SummaryItem[{"m: ", assoc["m"]}], "  ",
+                  BoxForm`SummaryItem[{"n: ", assoc["n"]}]}],
+             BoxForm`SummaryItem[{"a: ", assoc["a"]}]};
+  extended = {BoxForm`SummaryItem[{"Frequency: ", assoc["\[Omega]"]}],
+              BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"],
+              BoxForm`SummaryItem[{"Coordinates: ", assoc["Coordinates"]}]
+              }]};
   BoxForm`ArrangeSummaryBox[
-    QNMMode,
-    tm,
+    QNMRadialFunction,
+    qnmrf,
     None,
     summary,
     extended,
     form
   ]
+];
+
+
+(* ::Subsection::Closed:: *)
+(*Accessing attributes*)
+
+
+QNMRadialFunction[assoc_][y_String] /; !MemberQ[{"RadialFunction"}, y] :=
+  assoc[y];
+
+
+Keys[m_QNMRadialFunction] ^:= DeleteCases[Join[Keys[m[[-1]]], {}], "RadialFunction"];
+
+
+(* ::Subsection:: *)
+(*Numerical evaluation*)
+
+
+SetAttributes[QNMRadialFunction, {NumericFunction}];
+
+
+outsideDomainQ[r_, rmin_, rmax_] := Min[r]<rmin || Max[r]>rmax;
+
+
+QNMRadialFunction[assoc_][r:(_?NumericQ|{_?NumericQ..})] :=
+ Module[{rmin, rmax},
+  {rmin, rmax} = assoc["Domain"];
+  If[outsideDomainQ[r, rmin, rmax],
+    Message[QNMRadialFunction::dmval, #]& /@ Select[Flatten[{r}], outsideDomainQ[#, rmin, rmax]&];
+    Return[Indeterminate];
+  ];
+  Quiet[assoc["RadialFunction"][r], InterpolatingFunction::dmval]
+ ];
+
+
+Derivative[n:1][QNMRadialFunction[s_, l_, m_, a_, \[Omega]_, assoc_]][r:(_?NumericQ|{_?NumericQ..})] :=
+ Module[{rmin, rmax},
+  {rmin, rmax} = assoc["Domain"];
+  If[outsideDomainQ[r, rmin, rmax],
+    Message[QNMRadialFunction::dmval, #]& /@ Select[Flatten[{r}], outsideDomainQ[#, rmin, rmax]&];
+    Return[Indeterminate];
+  ];
+  Quiet[Derivative[n][assoc["RadialFunction"]][r], InterpolatingFunction::dmval]
+ ];
+
+
+Derivative[n_Integer/;n>1][qnmrf:(QNMRadialFunction[s_, l_, m_, a_, \[Omega]_, assoc_])][r0:(_?NumericQ|{_?NumericQ..})] :=
+ Module[{Rderivs, R, r, i, res},
+  Rderivs = D[R[r_], {r_, i_}] :> D[0(*FIXME*), {r, i - 2}] /; i >= 2;
+  Do[Derivative[i][R][r] = Collect[D[Derivative[i - 1][R][r], r] /. Rderivs, {R'[r], R[r]}, Simplify];, {i, 2, n}];
+  res = Derivative[n][R][r] /. {
+    R'[r] -> qnmrf'[r0],
+    R[r] -> qnmrf[r0], r -> r0};
+  Clear[Rderivs, i];
+  Remove[R, r];
+  res
 ];
 
 
@@ -354,7 +428,7 @@ MakeBoxes[tm: QNMMode[assoc_], form:(StandardForm|TraditionalForm)] :=
 (*Protect symbols*)
 
 
-SetAttributes[{QNMFrequency, QNMMode}, {Protected, ReadProtected}];
+SetAttributes[{QNMFrequency, QNMMode, QNMRadialFunction}, {Protected, ReadProtected}];
 
 
 (* ::Subsection:: *)
