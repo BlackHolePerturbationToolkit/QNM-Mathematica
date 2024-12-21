@@ -4,11 +4,11 @@
 (*QNM*)
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Create Package*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*BeginPackage*)
 
 
@@ -21,14 +21,14 @@ BeginPackage["QNM`",
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Unprotect symbols*)
 
 
 ClearAttributes[{QNMFrequency, QNMMode, QNMRadialFunction}, {Protected, ReadProtected}];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Usage messages*)
 
 
@@ -48,7 +48,7 @@ Returns: <| \"QNMfrequency\" -> \[Omega], \"Radial Function\" -> F |>";
 QNMRadialFunction::usage = "QNMRadialFunction[...] is an object representing a quasinormal mode solution to the radial Teukolsky equation.";
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Error messages*)
 
 
@@ -59,14 +59,14 @@ QNMMode::convergence = "Eigenvalue failed to converge to specified tolerance. Fi
 QNMRadialFunction::dmval = "Radius `1` lies outside the computational domain.";
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Begin Private section*)
 
 
 Begin["`Private`"];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Global Debug Flag*)
 
 
@@ -110,21 +110,21 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, a_, \[Omega]gu
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Calculate QNM Frequency*)
 
 
 (*CP comment: To do: currently just n=0. Generalise?*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Parameters*)
 
 
 M=1;
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Operator Functions*)
 
 
@@ -134,7 +134,7 @@ B[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=(a^2-16M^2)\[Omega]^2+2(m a +2 I s 
 M\[Rho][\[Omega]_,s_Integer,m_Integer,a_]:=-\[Rho]^2\[CapitalDelta][\[Rho],a]R''[\[Rho]]+A[\[Omega],s,m ,a,\[Rho]]R'[\[Rho]]+B[\[Omega],s,m ,a,\[Rho]]R[\[Rho]];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Discretization*)
 
 
@@ -148,7 +148,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Radial Eigenvalues*)
 
 
@@ -169,7 +169,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Eigenvalue difference*)
 
 
@@ -181,7 +181,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Define function options*)
 
 
@@ -189,7 +189,7 @@ Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100, "\[Omega]0"->1};
 Default[QNMFrequency] = 0;
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Newton Raphson solver*)
 
 
@@ -249,7 +249,7 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:
 QNMFrequency[s_Integer,l_Integer,m_Integer,a_,opts:OptionsPattern[]] := QNMFrequency[s,l,m,Default[QNMFrequency],a,opts];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Calculate radial function*)
 
 
@@ -257,7 +257,7 @@ rp[a_,M_] := M+Sqrt[M^2-a^2];
 rm[a_,M_] := M-Sqrt[M^2-a^2];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Define function options*)
 
 
@@ -265,7 +265,7 @@ Options[QNMMode] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"Hyper
 Default[QNMMode] = 0;
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Use the eigenvalue to calculate the eigenfunction*)
 
 
@@ -326,14 +326,14 @@ QNMMode[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Modu
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Overload for fewer arguments*)
 
 
 QNMMode[s_Integer,l_Integer,m_Integer, a_, opts:OptionsPattern[]] := QNMMode[s,l,m,Default[QNMMode],a,opts];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*QNMRadialFunction*)
 
 
@@ -375,7 +375,7 @@ QNMRadialFunction[assoc_][y_String] /; !MemberQ[{"RadialFunction"}, y] :=
 Keys[m_QNMRadialFunction] ^:= DeleteCases[Join[Keys[m[[-1]]], {}], "RadialFunction"];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Numerical evaluation*)
 
 
@@ -420,18 +420,18 @@ Derivative[n_Integer/;n>1][qnmrf:(QNMRadialFunction[s_, l_, m_, a_, \[Omega]_, a
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*End Package*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Protect symbols*)
 
 
 SetAttributes[{QNMFrequency, QNMMode, QNMRadialFunction}, {Protected, ReadProtected}];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*End*)
 
 
