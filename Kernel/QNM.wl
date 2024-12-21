@@ -350,9 +350,9 @@ MakeBoxes[qnmrf: QNMRadialFunction[assoc_], form:(StandardForm|TraditionalForm)]
                   BoxForm`SummaryItem[{"n: ", assoc["n"]}]}],
              BoxForm`SummaryItem[{"a: ", assoc["a"]}]};
   extended = {BoxForm`SummaryItem[{"Frequency: ", assoc["\[Omega]"]}],
-              BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"],
+              BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"]}],
               BoxForm`SummaryItem[{"Coordinates: ", assoc["Coordinates"]}]
-              }]};
+              };
   BoxForm`ArrangeSummaryBox[
     QNMRadialFunction,
     qnmrf,
