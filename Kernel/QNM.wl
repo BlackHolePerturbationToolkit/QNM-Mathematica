@@ -74,6 +74,10 @@ DEBUG=False;
 
 
 (* ::Section::Closed:: *)
+(*QNMFrequency*)
+
+
+(* ::Subsection::Closed:: *)
 (*Interpolation of tabulated QNM frequencies*)
 
 
@@ -99,7 +103,7 @@ QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] := QNMFrequency
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Subsection::Closed:: *)
 (*Calculate QNM frequency by finding zero of incidence amplitude*)
 
 
@@ -110,21 +114,21 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, a_, \[Omega]gu
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Subsection::Closed:: *)
 (*Calculate QNM Frequency*)
 
 
 (*CP comment: To do: currently just n=0. Generalise?*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsubsection::Closed:: *)
 (*Parameters*)
 
 
 M=1;
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsubsection::Closed:: *)
 (*Operator Functions*)
 
 
@@ -134,7 +138,7 @@ B[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=(a^2-16M^2)\[Omega]^2+2(m a +2 I s 
 M\[Rho][\[Omega]_,s_Integer,m_Integer,a_]:=-\[Rho]^2\[CapitalDelta][\[Rho],a]R''[\[Rho]]+A[\[Omega],s,m ,a,\[Rho]]R'[\[Rho]]+B[\[Omega],s,m ,a,\[Rho]]R[\[Rho]];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsubsection::Closed:: *)
 (*Discretization*)
 
 
@@ -148,7 +152,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsubsection::Closed:: *)
 (*Radial Eigenvalues*)
 
 
@@ -169,7 +173,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsubsection::Closed:: *)
 (*Eigenvalue difference*)
 
 
@@ -181,7 +185,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsubsection::Closed:: *)
 (*Define function options*)
 
 
@@ -189,7 +193,7 @@ Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100, "\[Omega]0"->1};
 Default[QNMFrequency] = 0;
 
 
-(* ::Section::Closed:: *)
+(* ::Subsubsection::Closed:: *)
 (*Newton Raphson solver*)
 
 
@@ -242,7 +246,7 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Overload for fewer arguments*)
 
 
@@ -250,7 +254,7 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,a_,opts:OptionsPattern[]] := QNMFrequ
 
 
 (* ::Section::Closed:: *)
-(*Calculate radial function*)
+(*QNMRadial*)
 
 
 rp[a_,M_] := M+Sqrt[M^2-a^2];
