@@ -262,79 +262,67 @@ rm[a_,M_] := M-Sqrt[M^2-a^2];
 
 
 (* ::Subsection::Closed:: *)
-(*Define function options*)
+(*QNMRadial*)
 
 
 Options[QNMRadial] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"Hyperboloidal"};
 Default[QNMRadial] = 0;
 
 
-(* ::Subsection::Closed:: *)
-(*Use the eigenvalue to calculate the eigenfunction*)
+QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]] :=
+ Module[{\[Omega], ev, ef, \[Rho]grida, dd1, dd2, DiscretizationRules, Mat, RadialFunction, Delta, DeltaTilde, h, h\[Phi], tol, NN, coords},
+  (* Load options values *)
+  tol = OptionValue["Tolerance"];
+  NN = OptionValue["Resolution"];
+  coords = OptionValue["Coordinates"];
 
+  (* Debug *)
+  If[DEBUG,
+    Print["Computing QNMRadial with tolerance ", N[tol], " resolution ", NN, " and coordinates ", coords];
+  ];
 
-(* Calculate the eigenvalue first, then solve for the radial profile *)
-QNMRadial[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Module[
-	{\[Omega],ev,ef,\[Rho]grida,dd1,dd2,DiscretizationRules,Mat,RadialFunction,Delta,
-	DeltaTilde,h,h\[Phi],tol,NN,coords},
-		(* Load options values *)
-		tol = OptionValue["Tolerance"];
-		NN = OptionValue["Resolution"];
-		coords = OptionValue["Coordinates"];
-		
-		(* Debug *)
-		If[DEBUG,
-			Print["Computing QNMRadial with tolerance ", N[tol], " resolution ", NN, " and coordinates ", coords];
-		];
-		
-		If[coords != "BL" && coords != "Boyer-Lindquist" && coords != "BoyerLindquist" && coords != "Hyperboloidal",
-		Message[QNMRadial::coords, coords];
-		Return[$Failed];
-		];
-		
-		(* Get the frequency *)
-		\[Omega]=QNMFrequency[s,l,m,0,a,"Tolerance"->tol, "Resolution"->NN]["QNMfrequency"];
-		
-		(* Call the discretized system *)
-		\[Rho]grida = \[Rho]grid[a,NN];
-		dd1 = Dgrid[\[Rho]grida];
-		dd2 = DDgrid[\[Rho]grida];
-		
-		(* Define discretization in terms of grids *)
-		DiscretizationRules={\[Rho]->\[Rho]grida,R''[\[Rho]]->dd2, 
-			R'[\[Rho]]->dd1, R[\[Rho]]->IdentityMatrix[NN]};
-			
-		(* Evaluate discretized operator *)
-		Mat=M\[Rho][\[Omega],s,m,a]/.DiscretizationRules;
-		
-		(* Calculate the eigensystem given the eigenvalue *)
-		{ev,ef}=Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1]];
-		
-		Switch[coords,
-		"Hyperboloidal",
-			RadialFunction = Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]]}]];,
-		"BL" | "BoyerLindquist" | "Boyer\[Dash]Lindquist" ,
-			h=-(1/\[Rho]grida)+(2 M^2 ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2]+M Log[a^2+1/\[Rho]grida^2-(2 M)/\[Rho]grida]-4 M Log[1/\[Rho]grida];
-			h\[Phi]=(a ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2];
-			RadialFunction = Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h+I*m*h\[Phi]]}]];,
-		_,
-			Message[QNMRadial::coords, coords];
-			Return[$Failed];
-		];
+  If[coords != "BL" && coords != "Boyer-Lindquist" && coords != "BoyerLindquist" && coords != "Hyperboloidal",
+    Message[QNMRadial::coords, coords];
+    Return[$Failed];
+  ];
 
-		(* Return association *)
-		QNMRadialFunction[<|"s" -> s, "l" -> l, "m" -> m, "n" -> n, "a" -> a, "\[Omega]" -> \[Omega], "Eigenvalue" -> ev,
-		  "Method" -> "SpectralHyperboloidal", "RadialFunction" -> RadialFunction,
-		  "Coordinates" -> coords, "Domain" -> {rp[a, 1], \[Infinity]}
-		  |>]
+  (* Get the frequency *)
+  \[Omega] = QNMFrequency[s, l, m, 0, a, "Tolerance"->tol, "Resolution"->NN]["QNMfrequency"];
+
+  (* Call the discretized system *)
+  \[Rho]grida = \[Rho]grid[a,NN];
+  dd1 = Dgrid[\[Rho]grida];
+  dd2 = DDgrid[\[Rho]grida];
+
+  (* Define discretization in terms of grids *)
+  DiscretizationRules = {\[Rho]->\[Rho]grida, R''[\[Rho]]->dd2, R'[\[Rho]]->dd1, R[\[Rho]]->IdentityMatrix[NN]};
+
+  (* Evaluate discretized operator *)
+  Mat = M\[Rho][\[Omega],s,m,a] /. DiscretizationRules;
+
+  (* Calculate the eigensystem given the eigenvalue *)
+  {ev, ef} = Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1]];
+
+  Switch[coords,
+  "Hyperboloidal",
+    RadialFunction = Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]]}]];,
+  "BL" | "BoyerLindquist" | "Boyer\[Dash]Lindquist" ,
+    h = -(1/\[Rho]grida)+(2 M^2 ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2]+M Log[a^2+1/\[Rho]grida^2-(2 M)/\[Rho]grida]-4 M Log[1/\[Rho]grida];
+    h\[Phi] = (a ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2];
+    RadialFunction = Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h+I*m*h\[Phi]]}]];,
+  _,
+    Message[QNMRadial::coords, coords];
+    Return[$Failed];
+  ];
+
+  (* Return QNMRadialFunction *)
+  QNMRadialFunction[<|"s" -> s, "l" -> l, "m" -> m, "n" -> n, "a" -> a, "\[Omega]" -> \[Omega], "Eigenvalue" -> ev,
+    "Method" -> "SpectralHyperboloidal", "RadialFunction" -> RadialFunction,
+    "Coordinates" -> coords, "Domain" -> {rp[a, 1], \[Infinity]}|>]
 ]
 
 
-(* ::Subsection::Closed:: *)
-(*Overload for fewer arguments*)
-
-
-QNMRadial[s_Integer,l_Integer,m_Integer, a_, opts:OptionsPattern[]] := QNMRadial[s,l,m,Default[QNMRadial],a,opts];
+QNMRadial[s_Integer, l_Integer, m_Integer, a_, opts:OptionsPattern[]] := QNMRadial[s, l, m, Default[QNMRadial], a, opts];
 
 
 (* ::Section::Closed:: *)
