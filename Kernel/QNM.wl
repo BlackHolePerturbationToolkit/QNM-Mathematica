@@ -265,31 +265,39 @@ rm[a_,M_] := M-Sqrt[M^2-a^2];
 (*QNMRadial*)
 
 
-Options[QNMRadial] = {"Tolerance"->10^-6, "Resolution"->100, "Coordinates"->"Hyperboloidal"};
-Default[QNMRadial] = 0;
+SyntaxInformation[QNMRadial] =
+ {"ArgumentsPattern" -> {_, _, _, _, _, OptionsPattern[]}};
+
+
+Options[QNMRadial] = {
+  "Coordinates" -> "Hyperboloidal",
+  "Frequency" -> Automatic,
+  MaxPoints -> 100,
+  WorkingPrecision -> Automatic,
+  PrecisionGoal -> Automatic,
+  AccuracyGoal -> Automatic
+};
 
 
 QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]] :=
- Module[{\[Omega], ev, ef, \[Rho]grida, dd1, dd2, DiscretizationRules, Mat, RadialFunction, Delta, DeltaTilde, h, h\[Phi], tol, NN, coords},
+ Module[{\[Omega], ev, ef, \[Rho]grida, dd1, dd2, DiscretizationRules, Mat, RadialFunction, h, h\[Phi], NN, coords},
   (* Load options values *)
-  tol = OptionValue["Tolerance"];
-  NN = OptionValue["Resolution"];
+  NN = OptionValue["MaxPoints"];
+
+  (* Check a valid Coordinates option has been specified *)
   coords = OptionValue["Coordinates"];
-
-  (* Debug *)
-  If[DEBUG,
-    Print["Computing QNMRadial with tolerance ", N[tol], " resolution ", NN, " and coordinates ", coords];
-  ];
-
-  If[coords != "BL" && coords != "Boyer-Lindquist" && coords != "BoyerLindquist" && coords != "Hyperboloidal",
+  If[!MemberQ[{"BL", "Boyer-Lindquist", "BoyerLindquist","Hyperboloidal"}, coords],
     Message[QNMRadial::coords, coords];
     Return[$Failed];
   ];
 
   (* Get the frequency *)
-  \[Omega] = QNMFrequency[s, l, m, 0, a, "Tolerance"->tol, "Resolution"->NN]["QNMfrequency"];
+  If[OptionValue["Frequency"] === Automatic,
+    \[Omega] = QNMFrequency[s, l, m, n, a]["QNMfrequency"];,
+    \[Omega] = OptionValue["Frequency"];
+  ];
 
-  (* Call the discretized system *)
+  (* Construct the discretized system *)
   \[Rho]grida = \[Rho]grid[a,NN];
   dd1 = Dgrid[\[Rho]grida];
   dd2 = DDgrid[\[Rho]grida];
@@ -300,7 +308,7 @@ QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]]
   (* Evaluate discretized operator *)
   Mat = M\[Rho][\[Omega],s,m,a] /. DiscretizationRules;
 
-  (* Calculate the eigensystem given the eigenvalue *)
+  (* Calculate the eigenvectors *)
   {ev, ef} = Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1]];
 
   Switch[coords,
@@ -320,9 +328,6 @@ QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]]
     "Method" -> "SpectralHyperboloidal", "RadialFunction" -> RadialFunction,
     "Coordinates" -> coords, "Domain" -> {rp[a, 1], \[Infinity]}|>]
 ]
-
-
-QNMRadial[s_Integer, l_Integer, m_Integer, a_, opts:OptionsPattern[]] := QNMRadial[s, l, m, Default[QNMRadial], a, opts];
 
 
 (* ::Section::Closed:: *)
