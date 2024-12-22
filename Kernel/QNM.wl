@@ -400,7 +400,7 @@ QNMRadialFunction[assoc_][r:(_?NumericQ|{_?NumericQ..})] :=
  ];
 
 
-Derivative[n:1][QNMRadialFunction[s_, l_, m_, a_, \[Omega]_, assoc_]][r:(_?NumericQ|{_?NumericQ..})] :=
+Derivative[n_][QNMRadialFunction[assoc_]][r:(_?NumericQ|{_?NumericQ..})] :=
  Module[{rmin, rmax},
   {rmin, rmax} = assoc["Domain"];
   If[outsideDomainQ[r, rmin, rmax],
@@ -411,7 +411,7 @@ Derivative[n:1][QNMRadialFunction[s_, l_, m_, a_, \[Omega]_, assoc_]][r:(_?Numer
  ];
 
 
-Derivative[n_Integer/;n>1][qnmrf:(QNMRadialFunction[s_, l_, m_, a_, \[Omega]_, assoc_])][r0:(_?NumericQ|{_?NumericQ..})] :=
+(*Derivative[n_Integer/;n>1][qnmrf:(QNMRadialFunction[s_, l_, m_, a_, \[Omega]_, assoc_])][r0:(_?NumericQ|{_?NumericQ..})] :=
  Module[{Rderivs, R, r, i, res},
   Rderivs = D[R[r_], {r_, i_}] :> D[0(*FIXME*), {r, i - 2}] /; i >= 2;
   Do[Derivative[i][R][r] = Collect[D[Derivative[i - 1][R][r], r] /. Rderivs, {R'[r], R[r]}, Simplify];, {i, 2, n}];
@@ -421,7 +421,7 @@ Derivative[n_Integer/;n>1][qnmrf:(QNMRadialFunction[s_, l_, m_, a_, \[Omega]_, a
   Clear[Rderivs, i];
   Remove[R, r];
   res
-];
+];*)
 
 
 (* ::Section::Closed:: *)
