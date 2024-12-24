@@ -93,7 +93,7 @@ QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] := QNMFrequency
  Module[{h5file, dataset, data, ret},
   h5file = FileNameJoin[{$QNMDataDirectory, "QNM_s"<>ToString[s]<>".h5"}];
   dataset = "/l"<>ToString[l]<>"/m"<>ToString[m]<>"/n"<>ToString[n];
-  Quiet[data = Import[h5file, {"Datasets", dataset}, "ComplexKeys"->{"r", "i"}];, {Import::general, Import::noelem}];
+  Quiet[data = Import[h5file, {"Datasets", dataset}, "ComplexKeys"->{"r", "i"}];, {Import::general, Import::noelem, Import::nffil}];
   If[MatchQ[data, <|"a"->_, "omega"->_|>],
     ret = Interpolation[Transpose[Lookup[data, {"a","omega"}]], opts];,
     Message[QNMFrequency::nointerp, s, l, m, n];
@@ -189,7 +189,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 (*Define function options*)
 
 
-Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100, "\[Omega]0"->1};
+Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100, "\[Omega]0"->Automatic};
 Default[QNMFrequency] = 0;
 
 
@@ -214,6 +214,9 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:
 		Print["Calculating QNMFrequency with tolerance ", N[tol], " for ", NN, " gridpoints."]
 		];
 		\[Omega]guess=OptionValue["\[Omega]0"];
+		If[\[Omega]guess === Automatic,
+		  \[Omega]guess = Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp];
+		];
 		If[DEBUG,
 		monitor = PrintTemporary["Eigenvalue: ", Dynamic[\[Omega]guess]];
 		];
