@@ -327,6 +327,9 @@ Options[QNMRadial] = {
 };
 
 
+SetAttributes[QNMRadial, {Listable, NHoldAll}];
+
+
 QNMRadial[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a_, OptionsPattern[]] /;
   l < Abs[s] || Abs[m] > l || !AllTrue[{2s, 2l, 2m}, IntegerQ] || !IntegerQ[l-s] || !IntegerQ[m-s] || !IntegerQ[n] || n < 0 :=
  (Message[QNMRadial::params, s, l, m, n]; $Failed);
@@ -393,6 +396,9 @@ QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]]
 (*QNMRadialFunction*)
 
 
+SetAttributes[QNMRadialFunction, {NHoldAll}];
+
+
 (* ::Subsection::Closed:: *)
 (*Output format*)
 
@@ -433,9 +439,6 @@ Keys[m_QNMRadialFunction] ^:= DeleteCases[Join[Keys[m[[-1]]], {}], "RadialFuncti
 
 (* ::Subsection::Closed:: *)
 (*Numerical evaluation*)
-
-
-SetAttributes[QNMRadialFunction, {NumericFunction}];
 
 
 outsideDomainQ[r_, rmin_, rmax_] := Min[r]<rmin || Max[r]>rmax;
