@@ -32,17 +32,10 @@ ClearAttributes[{QNMFrequency, QNMRadial, QNMRadialFunction}, {Protected, ReadPr
 (*Usage messages*)
 
 
-QNMFrequency::usage = "QNMFrequency[s, l, m, n, a, opts] computes the fundamental quasinormal frequency following arXiv:2202.03837. Options are:
-\t\[Bullet] \"Tolerance\" -> \!\(\*SuperscriptBox[\(10\), \(-6\)]\) (default): Tolerance for Newton Raphson solver
-\t\[Bullet] \"Resolution\" -> 100 (default): Spectral resolution
-Returns: <| \"QNMfrequency\" -> \[Omega], \"SeparationConstant\" -> \[ScriptCapitalS] |>";
+QNMFrequency::usage = "QNMFrequency[s, l, m, n, a] computes a quasinormal mode frequency.";
 
 
-QNMRadial::usage = "QNMRadial[s, l, m, n, a, opts] computes the fundamental quasinormal mode frequency \[Omega] and corresponding radial eigenfunction following arXiv:2202.03837. Options are:
-\t\[Bullet] \"Tolerance\" -> \!\(\*SuperscriptBox[\(10\), \(-6\)]\) (default): Tolerance for Newton Raphson solver
-\t\[Bullet] \"Resolution\" -> 100 (default): Spectral resolution
-\t\[Bullet] \"Coordinates\" -> {\"BL\", \"Boyer-Lindquist\", \"Hyperboloidal (default) \"}: Choice of output coordinates
-Returns: <| \"QNMfrequency\" -> \[Omega], \"Radial Function\" -> F |>";
+QNMRadial::usage = "QNMRadial[s, l, m, n, a, opts] computes the radial eigenfunction of a quasinormal mode.";
 
 
 QNMRadialFunction::usage = "QNMRadialFunction[...] is an object representing a quasinormal mode solution to the radial Teukolsky equation.";
