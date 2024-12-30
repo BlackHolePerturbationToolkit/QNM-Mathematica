@@ -317,10 +317,12 @@ QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]]
   Switch[coords,
   "Hyperboloidal",
     RadialFunction = Function[{r}, Evaluate[Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]]}]][1/r]]];,
-  "BL" | "BoyerLindquist" | "Boyer\[Dash]Lindquist" ,
-    h = -(1/\[Rho]grida)+(2 M^2 ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2]+M Log[a^2+1/\[Rho]grida^2-(2 M)/\[Rho]grida]-4 M Log[1/\[Rho]grida];
-    h\[Phi] = (a ArcTan[(-M+1/\[Rho]grida)/Sqrt[a^2-M^2]])/Sqrt[a^2-M^2];
-    RadialFunction = Function[{r}, Evaluate[Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]] Exp[-I*\[Omega]*h+I*m*h\[Phi]]}]][1/r]]];,
+  "BL" | "BoyerLindquist" | "Boyer\[Dash]Lindquist",
+    RadialFunction = Function[{r}, Evaluate[
+      With[{rp = rp[a, M], rm = rm[a, M]},
+        h = (2 M rp )/(rp-rm) Log[r-rp]-(2 M rm )/(rp-rm) Log[r-rm]-r-4 M Log[r];
+        h\[Phi] = a/(rp-rm) Log[(r-rp)/(r-rm)];
+        Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]]}]][1/r] Exp[-I*\[Omega]*h+I*m*h\[Phi]]]]];,
   _,
     Message[QNMRadial::coords, coords];
     Return[$Failed];
