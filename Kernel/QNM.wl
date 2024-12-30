@@ -396,6 +396,10 @@ QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]]
 (*QNMRadialFunction*)
 
 
+SyntaxInformation[QNMRadialFunction] =
+ {"ArgumentsPattern" -> {_}};
+
+
 SetAttributes[QNMRadialFunction, {NHoldAll}];
 
 
