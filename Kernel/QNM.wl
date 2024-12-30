@@ -434,8 +434,10 @@ MakeBoxes[qnmrf: QNMRadialFunction[assoc_], form:(StandardForm|TraditionalForm)]
 (*Accessing attributes*)
 
 
-QNMRadialFunction[assoc_][y_String] /; !MemberQ[{"RadialFunction"}, y] :=
-  assoc[y];
+QNMRadialFunction[assoc_][key_String] := assoc[key];
+
+
+QNMRadialFunction[assoc_]["RadialFunction"] := Missing["KeyAbsent", "RadialFunction"];
 
 
 Keys[m_QNMRadialFunction] ^:= DeleteCases[Join[Keys[m[[-1]]], {}], "RadialFunction"];
