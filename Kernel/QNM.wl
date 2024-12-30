@@ -50,6 +50,8 @@ QNMFrequency::optx = "Unknown options in `1`";
 QNMFrequency::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMFrequency::findroot = "FindRoot failed to converge to the requested accuracy.";
 QNMFrequency::cmplx = "Only real values of a are allowed, but a=`1` specified.";
+QNMRadial::optx = "Unknown options in `1`";
+QNMRadial::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMRadial::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal, but got `1`";
 QNMRadial::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`";
 QNMRadialFunction::dmval = "Radius `1` lies outside the computational domain.";
@@ -310,51 +312,25 @@ rm[a_,M_] := M-Sqrt[M^2-a^2];
 
 
 (* ::Subsection::Closed:: *)
-(*QNMRadial*)
+(*QNMRadialHyperboloidal*)
 
 
-SyntaxInformation[QNMRadial] =
- {"ArgumentsPattern" -> {_, _, _, _, _, OptionsPattern[]}};
-
-
-Options[QNMRadial] = {
+Options[QNMRadialHyperboloidal] = {
   "Coordinates" -> "Hyperboloidal",
-  "Frequency" -> Automatic,
-  MaxPoints -> 100,
-  WorkingPrecision -> Automatic,
-  PrecisionGoal -> Automatic,
-  AccuracyGoal -> Automatic
+  "NumPoints" -> 100
 };
 
 
-SetAttributes[QNMRadial, {Listable, NHoldAll}];
-
-
-QNMRadial[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a_, OptionsPattern[]] /;
-  l < Abs[s] || Abs[m] > l || !AllTrue[{2s, 2l, 2m}, IntegerQ] || !IntegerQ[l-s] || !IntegerQ[m-s] || !IntegerQ[n] || n < 0 :=
- (Message[QNMRadial::params, s, l, m, n]; $Failed);
-
-
-QNMRadial[s_, l_, m_, n_, a_Complex, OptionsPattern[]] :=
- (Message[QNMRadial::cmplx, a]; $Failed);
-
-
-QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]] :=
- Module[{\[Omega], ev, ef, \[Rho]grida, dd1, dd2, DiscretizationRules, Mat, RadialFunction, h, h\[Phi], NN, coords},
+QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
+ Module[{ev, ef, \[Rho]grida, dd1, dd2, DiscretizationRules, Mat, RadialFunction, h, h\[Phi], NN, coords},
   (* Load options values *)
-  NN = OptionValue["MaxPoints"];
+  NN = OptionValue["NumPoints"];
 
   (* Check a valid Coordinates option has been specified *)
   coords = OptionValue["Coordinates"];
   If[!MemberQ[{"BL", "Boyer-Lindquist", "BoyerLindquist","Hyperboloidal"}, coords],
     Message[QNMRadial::coords, coords];
     Return[$Failed];
-  ];
-
-  (* Get the frequency *)
-  If[OptionValue["Frequency"] === Automatic,
-    \[Omega] = QNMFrequency[s, l, m, n, a]["QNMfrequency"];,
-    \[Omega] = OptionValue["Frequency"];
   ];
 
   (* Construct the discretized system *)
@@ -389,6 +365,57 @@ QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]]
   QNMRadialFunction[<|"s" -> s, "l" -> l, "m" -> m, "n" -> n, "a" -> a, "\[Omega]" -> \[Omega], "Eigenvalue" -> ev,
     "Method" -> "SpectralHyperboloidal", "RadialFunction" -> RadialFunction,
     "Coordinates" -> coords, "Domain" -> {rp[a, 1], \[Infinity]}|>]
+]
+
+
+(* ::Subsection::Closed:: *)
+(*QNMRadial*)
+
+
+SyntaxInformation[QNMRadial] =
+ {"ArgumentsPattern" -> {_, _, _, _, _, OptionsPattern[]}};
+
+
+Options[QNMRadial] = {
+  Method -> Automatic,
+  "Frequency" -> Automatic
+};
+
+
+SetAttributes[QNMRadial, {Listable, NHoldAll}];
+
+
+QNMRadial[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a_, OptionsPattern[]] /;
+  l < Abs[s] || Abs[m] > l || !AllTrue[{2s, 2l, 2m}, IntegerQ] || !IntegerQ[l-s] || !IntegerQ[m-s] || !IntegerQ[n] || n < 0 :=
+ (Message[QNMRadial::params, s, l, m, n]; $Failed);
+
+
+QNMRadial[s_, l_, m_, n_, a_Complex, OptionsPattern[]] :=
+ (Message[QNMRadial::cmplx, a]; $Failed);
+
+
+QNMRadial[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a:(_?InexactNumberQ|0), OptionsPattern[]] :=
+ Module[{\[Omega], opts, qnm},
+  (* Get the frequency *)
+  If[OptionValue["Frequency"] === Automatic,
+    \[Omega] = QNMFrequency[s, l, m, n, a]["QNMfrequency"];,
+    \[Omega] = OptionValue["Frequency"];
+  ];
+
+  Switch[OptionValue[Method],
+    Automatic|"Hyperboloidal",
+      qnm = QNMRadialHyperboloidal[s, l, m, n, a, \[Omega]],
+    {"Hyperboloidal", Rule[_,_]...},
+      opts = FilterRules[Rest[OptionValue[Method]], Options[QNMRadialHyperboloidal]];
+      If[opts =!= Rest[OptionValue[Method]],
+        Message[QNMRadial::optx, Method -> OptionValue[Method]];
+      ];
+      qnm = QNMRadialHyperboloidal[s, l, m, n, a, \[Omega], opts],
+    _,
+     Message[QNMRadial::optx, Method -> OptionValue[Method]];
+     qnm = $Failed;
+  ];
+  qnm
 ]
 
 
