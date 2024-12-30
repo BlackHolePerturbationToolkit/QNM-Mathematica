@@ -327,6 +327,15 @@ Options[QNMRadial] = {
 };
 
 
+QNMRadial[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a_, OptionsPattern[]] /;
+  l < Abs[s] || Abs[m] > l || !AllTrue[{2s, 2l, 2m}, IntegerQ] || !IntegerQ[l-s] || !IntegerQ[m-s] || !IntegerQ[n] || n < 0 :=
+ (Message[QNMRadial::params, s, l, m, n]; $Failed);
+
+
+QNMRadial[s_, l_, m_, n_, a_Complex, OptionsPattern[]] :=
+ (Message[QNMRadial::cmplx, a]; $Failed);
+
+
 QNMRadial[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]] :=
  Module[{\[Omega], ev, ef, \[Rho]grida, dd1, dd2, DiscretizationRules, Mat, RadialFunction, h, h\[Phi], NN, coords},
   (* Load options values *)
