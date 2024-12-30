@@ -46,7 +46,10 @@ QNMRadialFunction::usage = "QNMRadialFunction[...] is an object representing a q
 
 
 QNMFrequency::nointerp = "Interpolation data not available for s=`1`, l=`2`, m=`3`, n=`4`.";
-QNMFrequency::real = "Only real values of a are allowed, but a=`1`.";
+QNMFrequency::optx = "Unknown options in `1`";
+QNMFrequency::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
+QNMFrequency::findroot = "FindRoot failed to converge to the requested accuracy.";
+QNMFrequency::cmplx = "Only real values of a are allowed, but a=`1` specified.";
 QNMRadial::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal, but got `1`";
 QNMRadial::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`";
 QNMRadialFunction::dmval = "Radius `1` lies outside the computational domain.";
@@ -108,7 +111,7 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, a_, \[Omega]gu
 
 
 (* ::Subsection::Closed:: *)
-(*Calculate QNM Frequency*)
+(*Hyperboloidal method*)
 
 
 (*CP comment: To do: currently just n=0. Generalise?*)
@@ -182,8 +185,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 (*Define function options*)
 
 
-Options[QNMFrequency] = {"Tolerance"->10^-6, "Resolution"->100, "\[Omega]0"->Automatic};
-Default[QNMFrequency] = 0;
+Options[QNMFrequencyHyperboloidal] = {"Tolerance"->10^-6, "Resolution"->100, "\[Omega]0"->Automatic};
 
 
 (* ::Subsubsection::Closed:: *)
@@ -191,14 +193,9 @@ Default[QNMFrequency] = 0;
 
 
 (*CP commment: the algorithm solves for the separation constant, while SpinWeightedSpheroidalEigenvalue gives the Angular eigenvalue: SeparationConstant= (SpinWeightedSpheroidalEigenvalue+2 m a \[Omega]guess- (a \[Omega]guess)^2) *)
-QNMFrequency[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:=Module[
+QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]] :=
+ Module[
 	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega],tol,NN,MAXITS,count,monitor},
-		(* Check for real spin *)
-		If[!RealValuedNumberQ[a],
-		Message[QNMFrequency::real, a];
-		Return[$Failed];
-		];
-		
 		(* Load option values *)
 		tol = OptionValue["Tolerance"];
 		NN = OptionValue["Resolution"];
@@ -243,10 +240,65 @@ QNMFrequency[s_Integer,l_Integer,m_Integer,n_Integer,a_, opts:OptionsPattern[]]:
 
 
 (* ::Subsection::Closed:: *)
-(*Overload for fewer arguments*)
+(*QNMFrequency*)
 
 
-QNMFrequency[s_Integer,l_Integer,m_Integer,a_,opts:OptionsPattern[]] := QNMFrequency[s,l,m,Default[QNMFrequency],a,opts];
+SyntaxInformation[QNMFrequency] =
+ {"ArgumentsPattern" -> {_, _, _, _, _, OptionsPattern[]}};
+
+
+Options[QNMFrequency] = {Method -> Automatic};
+
+
+SetAttributes[QNMFrequency, {NumericFunction, Listable, NHoldAll}];
+
+
+QNMFrequency[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a_, OptionsPattern[]] /;
+  l < Abs[s] || Abs[m] > l || !AllTrue[{2s, 2l, 2m}, IntegerQ] || !IntegerQ[l-s] || !IntegerQ[m-s] || !IntegerQ[n] || n < 0 :=
+ (Message[QNMFrequency::params, s, l, m, n]; $Failed);
+
+
+QNMFrequency[s_, l_, m_, n_, a_Complex, OptionsPattern[]] :=
+ (Message[QNMFrequency::cmplx, a]; $Failed);
+
+
+QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] := 
+ Module[{opts, \[Omega]ini, \[Omega]},
+  Switch[OptionValue[Method],
+    "Interpolation",
+      \[Omega] = QNMFrequencyInterpolation[s, l, m, n][a],
+    {"Interpolation", Rule[_,_]...},
+      opts = FilterRules[Rest[OptionValue[Method]], Options[QNMFrequencyInterpolation]];
+      If[opts =!= Rest[OptionValue[Method]],
+        Message[QNMFrequency::optx, Method -> OptionValue[Method]];
+      ];
+      \[Omega] = QNMFrequencyInterpolation[s, l, m, n, opts][a];,
+    "IncidenceAmplitude",
+      \[Omega] = QNMFrequencyInIncidenceAmplitude[s, l, m, n, a],
+    {"IncidenceAmplitude", Rule[_,_]...},
+      opts = FilterRules[Rest[OptionValue[Method]], Options[QNMFrequencyInIncidenceAmplitude]];
+      If[opts =!= Rest[OptionValue[Method]],
+        Message[QNMFrequency::optx, Method -> OptionValue[Method]];
+      ];
+      \[Omega] = QNMFrequencyInIncidenceAmplitude[s, l, m, n, a, opts];,
+    "Hyperboloidal",
+      \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a]["QNMfrequency"];,
+    {"Hyperboloidal", Rule[_,_]...},
+	  opts = FilterRules[Rest[OptionValue[Method]], Options[QNMFrequencyHyperboloidal]];
+      If[opts =!= Rest[OptionValue[Method]],
+        Message[QNMFrequency::optx, Method -> OptionValue[Method]];
+      ];
+      \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a, opts]["QNMfrequency"];,
+    _,
+      Message[QNMFrequency::optx, Method -> OptionValue[Method]];
+      \[Omega] = $Failed;
+  ];
+  \[Omega]
+];
+
+
+QNMFrequency /: N[QNMFrequency[s_, l_, m_, n_, a_?NumericQ, opts:OptionsPattern[]], Nopts___] :=
+  QNMFrequency[s, l, m, n, N[a, Nopts], opts];
 
 
 (* ::Section::Closed:: *)
