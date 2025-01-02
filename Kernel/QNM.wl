@@ -72,6 +72,67 @@ DEBUG=False;
 
 
 (* ::Section::Closed:: *)
+(*Hyperboloidal equations*)
+
+
+(* ::Subsection::Closed:: *)
+(*Operators*)
+
+
+\[CapitalDelta][\[Rho]_,a_]:=1-2M \[Rho]+a^2 \[Rho]^2;
+A[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=2 I \[Omega]-2(1+s)\[Rho]+2(I \[Omega](a^2-8M^2)+I m a +(s+3)M)\[Rho]^2+4(2 I \[Omega] M-1) a^2 \[Rho]^3;
+B[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=(a^2-16M^2)\[Omega]^2+2(m a +2 I s M)\[Omega]+2(4(a^2-4M^2)M \[Omega]^2+(4 m a M-4I (s+2) M^2+I a^2)\[Omega]+ I m a+(s+1)M)\[Rho]+2(8 M^2 \[Omega]^2+6 I M \[Omega]-1)a^2 \[Rho]^2;
+M\[Rho][\[Omega]_,s_Integer,m_Integer,a_]:=-\[Rho]^2\[CapitalDelta][\[Rho],a]R''[\[Rho]]+A[\[Omega],s,m ,a,\[Rho]]R'[\[Rho]]+B[\[Omega],s,m ,a,\[Rho]]R[\[Rho]];
+
+
+(* ::Subsection::Closed:: *)
+(*Horizon locations*)
+
+
+M=1;
+
+
+rp[a_, M_] := M+Sqrt[M^2-a^2];
+rm[a_, M_] := M-Sqrt[M^2-a^2];
+
+
+(* ::Subsection::Closed:: *)
+(*Discretization*)
+
+
+(* Define the grid *)
+\[Rho]grid[a_, NN_Integer] := rp[a, M] Sort[N[1/2 (1+Cos[\[Pi] Range[0,1,1/(NN-1)]])]];
+(* Get differentiation matrices based on the grid *)
+Dgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[1],{\[Rho]grid},
+	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
+DDgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[2],{\[Rho]grid},
+	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
+
+
+(* ::Subsection::Closed:: *)
+(*Radial Eigenvalues*)
+
+
+(* Compute the eigenvalue of the Radial equation *)
+\[Lambda]r[\[Omega]_, s_Integer, m_Integer, a_, NN_] :=
+ Module[{\[Rho]grida, dd1, dd2, Mat, DiscretizationRules},
+  (* Create grid and differentiation matrices *)
+  \[Rho]grida = \[Rho]grid[a,NN];
+  dd1 = Dgrid[\[Rho]grida];
+  dd2 = DDgrid[\[Rho]grida];
+
+  (* Define discretization in terms of grids *)
+  DiscretizationRules={\[Rho]->\[Rho]grida, R''[\[Rho]]->dd2, R'[\[Rho]]->dd1, R[\[Rho]]->IdentityMatrix[NN]};
+
+  (* Evaluate discretized operator *)
+  Mat = M\[Rho][\[Omega], s, m, a] /. DiscretizationRules;
+
+  (* Return sorted eigenvalues *)
+  SortBy[Eigenvalues[Mat], Norm]
+]
+
+
+(* ::Section::Closed:: *)
 (*QNMFrequency*)
 
 
@@ -124,60 +185,13 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
 
 
 (* ::Subsubsection::Closed:: *)
-(*Operator Functions*)
-
-
-M=1;
-\[CapitalDelta][\[Rho]_,a_]:=1-2M \[Rho]+a^2 \[Rho]^2;
-A[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=2 I \[Omega]-2(1+s)\[Rho]+2(I \[Omega](a^2-8M^2)+I m a +(s+3)M)\[Rho]^2+4(2 I \[Omega] M-1) a^2 \[Rho]^3;
-B[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=(a^2-16M^2)\[Omega]^2+2(m a +2 I s M)\[Omega]+2(4(a^2-4M^2)M \[Omega]^2+(4 m a M-4I (s+2) M^2+I a^2)\[Omega]+ I m a+(s+1)M)\[Rho]+2(8 M^2 \[Omega]^2+6 I M \[Omega]-1)a^2 \[Rho]^2;
-M\[Rho][\[Omega]_,s_Integer,m_Integer,a_]:=-\[Rho]^2\[CapitalDelta][\[Rho],a]R''[\[Rho]]+A[\[Omega],s,m ,a,\[Rho]]R'[\[Rho]]+B[\[Omega],s,m ,a,\[Rho]]R[\[Rho]];
-
-
-(* ::Subsubsection::Closed:: *)
-(*Discretization*)
-
-
-rmax[a_]:=If[a==0, 1/2,1/a^2 (1-Sqrt[1-a^2]) ];
-(* Define the grid *)
-\[Rho]grid[a_, NN_Integer] := rmax[a] Sort[N[1/2 (1+Cos[\[Pi] Range[0,1,1/(NN-1)]])]];
-(* Get differentiation matrices based on the grid *)
-Dgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[1],{\[Rho]grid},
-	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
-DDgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[2],{\[Rho]grid},
-	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
-
-
-(* ::Subsubsection::Closed:: *)
-(*Radial Eigenvalues*)
-
-
-(* Compute the eigenvalue of the Radial equation *)
-\[Lambda]r[\[Omega]guess_,s_Integer, m_Integer, a_, NN_]:=Module[
-	{\[Rho]grida,dd1,dd2,Mat,DiscretizationRules},
-		(* Call grids *)
-		\[Rho]grida = \[Rho]grid[a,NN];
-		dd1 = Dgrid[\[Rho]grida];
-		dd2 = DDgrid[\[Rho]grida];
-		(* Define discretization in terms of grids *)
-		DiscretizationRules={\[Rho]->\[Rho]grida,R''[\[Rho]]->dd2, 
-			R'[\[Rho]]->dd1, R[\[Rho]]->IdentityMatrix[NN]};
-		(* Evaluate discretized operator *)
-		Mat=M\[Rho][\[Omega]guess,s,m,a]/.DiscretizationRules;
-		(* Return sorted eigenvalues *)
-		Eigenvalues[{Mat}]//SortBy[#,Norm]&
-]
-
-
-(* ::Subsubsection::Closed:: *)
 (*Eigenvalue difference*)
 
 
-(* CP comment: Computes the difference between the  radial and angular separation constant! *)
-\[Delta]\[Lambda][\[Omega]guess_,s_Integer,l_Integer,m_Integer,a_,NN_Integer]:=Module[
-	{\[CapitalLambda]},
-		\[CapitalLambda]=SpinWeightedSpheroidalEigenvalue[s,l,m,a \[Omega]guess];
-		SetPrecision[-\[Lambda]r[\[Omega]guess,s,m,a,NN][[1]]-(\[CapitalLambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2),50]
+\[Delta]\[Lambda][\[Omega]guess_, s_Integer, l_Integer, m_Integer, a_, NN_Integer] :=
+ Module[{\[Lambda]},
+  \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]guess];
+  SetPrecision[-\[Lambda]r[\[Omega]guess, s, m, a, NN][[1]] - (\[Lambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2),50]
 ]
 
 
@@ -303,10 +317,6 @@ QNMFrequency /: N[QNMFrequency[s_, l_, m_, n_, a_?NumericQ, opts:OptionsPattern[
 
 (* ::Section::Closed:: *)
 (*QNMRadial*)
-
-
-rp[a_,M_] := M+Sqrt[M^2-a^2];
-rm[a_,M_] := M-Sqrt[M^2-a^2];
 
 
 (* ::Subsection::Closed:: *)
