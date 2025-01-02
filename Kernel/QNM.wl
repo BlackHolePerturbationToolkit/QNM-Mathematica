@@ -105,8 +105,15 @@ QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] := QNMFrequency
 (*Calculate QNM frequency by finding zero of incidence amplitude*)
 
 
-QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, a_, \[Omega]guess_] :=
- Module[{\[Omega]QNM, inInc},
+Options[QNMFrequencyInIncidenceAmplitude] = {"InitialGuess" -> Automatic};
+
+
+QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, OptionsPattern[]] :=
+ Module[{\[Omega]guess, \[Omega]QNM, inInc},
+  \[Omega]guess=OptionValue["InitialGuess"];
+  If[\[Omega]guess === Automatic,
+    \[Omega]guess = Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp];
+  ];
   inInc[\[Omega]_?NumericQ] := TeukolskyRadial[s, l, m, a, \[Omega], Method -> "MST"]["In"]["Amplitudes"]["Incidence"];
   \[Omega]QNM /. FindRoot[inInc[\[Omega]QNM], {\[Omega]QNM, \[Omega]guess}]
 ];
