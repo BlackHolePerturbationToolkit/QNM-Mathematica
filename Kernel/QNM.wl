@@ -389,7 +389,7 @@ QNMRadial[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a:(_?InexactNumber
  Module[{\[Omega], opts, qnm},
   (* Get the frequency *)
   If[OptionValue["Frequency"] === Automatic,
-    \[Omega] = QNMFrequency[s, l, m, n, a]["QNMfrequency"];,
+    \[Omega] = QNMFrequency[s, l, m, n, a];,
     \[Omega] = OptionValue["Frequency"];
   ];
 
