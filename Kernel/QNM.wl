@@ -178,7 +178,7 @@ DDgrid[\[Rho]grid_]:= DDgrid[\[Rho]grid] = NDSolve`FiniteDifferenceDerivative[De
 (*Define function options*)
 
 
-Options[QNMFrequencyHyperboloidal] = {"Tolerance"->10^-6, "Resolution"->100, "\[Omega]0"->Automatic};
+Options[QNMFrequencyHyperboloidal] = {"Tolerance"->10^-6, "Resolution"->100, "InitialGuess"->Automatic};
 
 
 (* ::Subsubsection::Closed:: *)
@@ -196,7 +196,7 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
 		If[DEBUG,
 		Print["Calculating QNMFrequency with tolerance ", N[tol], " for ", NN, " gridpoints."]
 		];
-		\[Omega]guess=OptionValue["\[Omega]0"];
+		\[Omega]guess=OptionValue["InitialGuess"];
 		If[\[Omega]guess === Automatic,
 		  \[Omega]guess = Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp];
 		];
