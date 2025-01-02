@@ -199,7 +199,7 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
 (*Define function options*)
 
 
-Options[QNMFrequencyHyperboloidal] = {"Tolerance"->10^-6, "Resolution"->100, "InitialGuess"->Automatic};
+Options[QNMFrequencyHyperboloidal] = {"Tolerance"->10^-6, "NumPoints"->100, "InitialGuess"->Automatic};
 
 
 (* ::Subsubsection::Closed:: *)
@@ -212,7 +212,7 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
 	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega],tol,NN,MAXITS,count,monitor},
 		(* Load option values *)
 		tol = OptionValue["Tolerance"];
-		NN = OptionValue["Resolution"];
+		NN = OptionValue["NumPoints"];
 		(* Debug *)
 		If[DEBUG,
 		Print["Calculating QNMFrequency with tolerance ", N[tol], " for ", NN, " gridpoints."]
