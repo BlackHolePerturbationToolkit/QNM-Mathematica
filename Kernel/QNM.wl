@@ -101,12 +101,12 @@ rm[a_, M_] := M-Sqrt[M^2-a^2];
 
 
 (* Define the grid *)
-\[Rho]grid[a_, NN_Integer] := rp[a, M] Sort[N[1/2 (1+Cos[\[Pi] Range[0,1,1/(NN-1)]])]];
+\[Rho]grid[a_, NN_Integer] := rp[a, M] Reverse[1/2 (1+Cos[\[Pi] Subdivide[NN-1]])];
+
+
 (* Get differentiation matrices based on the grid *)
-Dgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[1],{\[Rho]grid},
-	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
-DDgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[2],{\[Rho]grid},
-	DifferenceOrder->{"Pseudospectral"},PeriodicInterpolation->{False}]["DifferentiationMatrix"];
+Dgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[1], \[Rho]grid, DifferenceOrder -> "Pseudospectral", PeriodicInterpolation -> False]["DifferentiationMatrix"];
+DDgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[2], \[Rho]grid, DifferenceOrder -> "Pseudospectral", PeriodicInterpolation -> False]["DifferentiationMatrix"];
 
 
 (* ::Subsection::Closed:: *)
