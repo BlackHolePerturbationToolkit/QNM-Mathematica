@@ -101,7 +101,7 @@ rm[a_, M_] := M-Sqrt[M^2-a^2];
 
 
 (* Define the grid *)
-\[Rho]grid[a_, NN_Integer] := rp[a, M] Reverse[1/2 (1+Cos[\[Pi] Subdivide[NN-1]])];
+\[Rho]grid[a_, NN_Integer] := 1/rp[a, M] Reverse[1/2 (1+Cos[\[Pi] Subdivide[NN-1]])];
 
 
 (* Get differentiation matrices based on the grid *)
