@@ -191,7 +191,7 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
 \[Delta]\[Lambda][\[Omega]guess_, s_Integer, l_Integer, m_Integer, a_, NN_Integer] :=
  Module[{\[Lambda]},
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]guess];
-  SetPrecision[-\[Lambda]r[\[Omega]guess, s, m, a, NN][[1]] - (\[Lambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2),50]
+  -\[Lambda]r[\[Omega]guess, s, m, a, NN][[1]] - (\[Lambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2)
 ]
 
 
@@ -219,8 +219,8 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
 		];
 		\[Omega]guess=OptionValue["InitialGuess"];
 		If[\[Omega]guess === Automatic,
-		  \[Omega]guess = Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp];
-		];
+		  \[Omega]guess = SetPrecision[Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp], Precision[a]];
+		];Echo[\[Omega]guess, "Initial"];
 		If[DEBUG,
 		monitor = PrintTemporary["Eigenvalue: ", Dynamic[\[Omega]guess]];
 		];
@@ -233,10 +233,10 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
 		count = 0;
 		Until[Norm[\[Delta]\[Omega]]<tol,
 			count += 1;
-			F=SetPrecision[\[Delta]\[Lambda][\[Omega]guess, s,l, m, a,NN],50];
-			Fp=SetPrecision[(\[Delta]\[Lambda][\[Omega]guess+\[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-\[Epsilon], s,l, m, a,NN])/(2 \[Epsilon])+(\[Delta]\[Lambda][\[Omega]guess+I \[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-I \[Epsilon], s,l, m, a,NN])/(2 \[Epsilon] I),50];
-			\[Omega]guess= SetPrecision[\[Omega]guess-(\[Gamma] F)/Fp,50];
-			\[Delta]\[Omega]= SetPrecision[-(\[Gamma] F)/Fp,50];
+			F=\[Delta]\[Lambda][\[Omega]guess, s,l, m, a,NN];
+			Fp=(\[Delta]\[Lambda][\[Omega]guess+\[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-\[Epsilon], s,l, m, a,NN])/(2 \[Epsilon])+(\[Delta]\[Lambda][\[Omega]guess+I \[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-I \[Epsilon], s,l, m, a,NN])/(2 \[Epsilon] I);
+			\[Omega]guess= \[Omega]guess-(\[Gamma] F)/Fp;Echo[\[Omega]guess, "Step"];
+			\[Delta]\[Omega]= -(\[Gamma] F)/Fp;
 						
 			If[count > MAXITS, 
 				Message[QNMRadial::convergence, \[Omega]guess];
