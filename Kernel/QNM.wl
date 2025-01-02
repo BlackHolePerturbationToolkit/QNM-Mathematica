@@ -320,7 +320,7 @@ Options[QNMRadialHyperboloidal] = {
 
 
 QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
- Module[{ev, ef, \[Rho]grida, dd1, dd2, DiscretizationRules, Mat, RadialFunction, h, h\[Phi], NN, coords},
+ Module[{\[Lambda], ev, ef, \[Rho]grida, dd1, dd2, DiscretizationRules, Mat, RadialFunction, h, h\[Phi], NN, coords},
   (* Load options values *)
   NN = OptionValue["NumPoints"];
 
@@ -340,10 +340,12 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
   DiscretizationRules = {\[Rho]->\[Rho]grida, R''[\[Rho]]->dd2, R'[\[Rho]]->dd1, R[\[Rho]]->IdentityMatrix[NN]};
 
   (* Evaluate discretized operator *)
-  Mat = M\[Rho][\[Omega],s,m,a] /. DiscretizationRules;
+  \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
+  ev = -(\[Lambda] + 2 a m \[Omega] - (a \[Omega])^2);
+  Mat = M\[Rho][\[Omega],s,m,a] - ev R[\[Rho]] /. DiscretizationRules;
 
   (* Calculate the eigenvectors *)
-  {ev, ef} = Sort[Transpose[Eigensystem[{Mat}]], Norm[#1[[1]]]<Norm[#2[[1]]]&][[1]];
+  ef = First[NullSpace[Mat]];
 
   Switch[coords,
   "Hyperboloidal",
@@ -360,7 +362,7 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
   ];
 
   (* Return QNMRadialFunction *)
-  QNMRadialFunction[<|"s" -> s, "l" -> l, "m" -> m, "n" -> n, "a" -> a, "\[Omega]" -> \[Omega], "Eigenvalue" -> ev,
+  QNMRadialFunction[<|"s" -> s, "l" -> l, "m" -> m, "n" -> n, "a" -> a, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
     "Method" -> "SpectralHyperboloidal", "RadialFunction" -> RadialFunction,
     "Coordinates" -> coords, "Domain" -> {rp[a, 1], \[Infinity]}|>]
 ]
