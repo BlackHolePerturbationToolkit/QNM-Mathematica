@@ -72,11 +72,11 @@ DEBUG=False;
 
 
 (* ::Section::Closed:: *)
-(*Hyperboloidal equations*)
+(*Utilities*)
 
 
 (* ::Subsection::Closed:: *)
-(*Operators*)
+(*Hyperboloidal operators*)
 
 
 \[CapitalDelta][\[Rho]_,a_]:=1-2M \[Rho]+a^2 \[Rho]^2;
@@ -107,6 +107,47 @@ rm[a_, M_] := M-Sqrt[M^2-a^2];
 (* Get differentiation matrices based on the grid *)
 Dgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[1], \[Rho]grid, DifferenceOrder -> "Pseudospectral", PeriodicInterpolation -> False]["DifferentiationMatrix"];
 DDgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[2], \[Rho]grid, DifferenceOrder -> "Pseudospectral", PeriodicInterpolation -> False]["DifferentiationMatrix"];
+
+
+(* ::Subsection::Closed:: *)
+(*Chebyshev interpolation*)
+
+
+(* Convert from values at Chebyshev nodes to Chebyshev coefficients *)
+chebCoeffs[values_] :=
+ Module[{coeffs},
+  coeffs = Sqrt[2/(Length[values]-1)] FourierDCT[values, 1];
+  coeffs[[{1,-1}]] /= 2;
+  coeffs
+];
+
+
+(* Construct a Chebyshev InterpolatingFunction *)
+(* Useful references on the structure of an InterpolatingFunction:
+   https://mathematica.stackexchange.com/a/28341
+   https://mathematica.stackexchange.com/a/98349
+   https://mathematica.stackexchange.com/a/114065 *)
+chebInterp[data_, domain_] :=
+ Module[{order, coeffs},
+  order = Length[data] - 1;
+  coeffs = chebCoeffs[data];
+  InterpolatingFunction[
+    {domain}    (* Interpolation domain *),
+    {5          (* InterpolatingFunction version *),
+     1,         (* Bit field: always 1 for Chebyshev *)
+     order,     (* Max derivative order in data *)
+     {2},       (* Domain grid size *)
+     {order+1}, (* Interpolation order + 1 *)
+     0,         (* Not a derivative of an existing InterpolatingFunction *)
+     0,         (* Non-periodic interpolation *)
+     0, 0,
+     Automatic, (* Extrapolation handler *)
+     {}, {}, False},
+    {domain},   (* Domain grid *)
+    {data, coeffs},
+    {{{{1}, {1,2}, {1,2}}, {Automatic, ChebyshevT, ChebyshevT}}}
+  ]
+];
 
 
 (* ::Subsection::Closed:: *)
@@ -359,13 +400,13 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
 
   Switch[coords,
   "Hyperboloidal",
-    RadialFunction = Function[{r}, Evaluate[Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]]}]][1/r]]];,
+    RadialFunction = Function[{r}, Evaluate[chebInterp[Reverse[ef/ef[[-1]]], \[Rho]grida[[{1,-1}]]][1/r]]];,
   "BL" | "BoyerLindquist" | "Boyer\[Dash]Lindquist",
     RadialFunction = Function[{r}, Evaluate[
       With[{rp = rp[a, M], rm = rm[a, M]},
         h = (2 M rp )/(rp-rm) Log[r-rp]-(2 M rm )/(rp-rm) Log[r-rm]-r-4 M Log[r];
         h\[Phi] = a/(rp-rm) Log[(r-rp)/(r-rm)];
-        Interpolation[Transpose[{\[Rho]grida,ef/ef[[-1]]}]][1/r] Exp[-I*\[Omega]*h+I*m*h\[Phi]]]]];,
+        chebInterp[Reverse[ef/ef[[-1]]], \[Rho]grida[[{1,-1}]]][1/r] Exp[-I*\[Omega]*h+I*m*h\[Phi]]]]];,
   _,
     Message[QNMRadial::coords, coords];
     Return[$Failed];
