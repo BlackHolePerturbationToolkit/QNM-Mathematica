@@ -220,7 +220,7 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
 		\[Omega]guess=OptionValue["InitialGuess"];
 		If[\[Omega]guess === Automatic,
 		  \[Omega]guess = SetPrecision[Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp], Precision[a]];
-		];Echo[\[Omega]guess, "Initial"];
+		];
 		If[DEBUG,
 		monitor = PrintTemporary["Eigenvalue: ", Dynamic[\[Omega]guess]];
 		];
@@ -235,7 +235,7 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
 			count += 1;
 			F=\[Delta]\[Lambda][\[Omega]guess, s,l, m, a,NN];
 			Fp=(\[Delta]\[Lambda][\[Omega]guess+\[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-\[Epsilon], s,l, m, a,NN])/(2 \[Epsilon])+(\[Delta]\[Lambda][\[Omega]guess+I \[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-I \[Epsilon], s,l, m, a,NN])/(2 \[Epsilon] I);
-			\[Omega]guess= \[Omega]guess-(\[Gamma] F)/Fp;Echo[\[Omega]guess, "Step"];
+			\[Omega]guess= \[Omega]guess-(\[Gamma] F)/Fp;
 			\[Delta]\[Omega]= -(\[Gamma] F)/Fp;
 						
 			If[count > MAXITS, 
