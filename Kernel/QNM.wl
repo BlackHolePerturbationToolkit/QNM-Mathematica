@@ -144,21 +144,6 @@ chebInterp[data_, domain_] :=
 ];
 
 
-(* ::Subsection::Closed:: *)
-(*Radial Eigenvalues*)
-
-
-(* Compute the eigenvalue of the Radial equation *)
-\[Lambda]r[\[Omega]_, s_Integer, m_Integer, a_, numpoints_] :=
- Module[{Mat},
-  (* Evaluate discretized operator *)
-  Mat = \[ScriptCapitalM][s, m, a, \[Omega], -(2 a m \[Omega] - (a \[Omega])^2), numpoints];
-
-  (* Return sorted eigenvalues *)
-  SortBy[Eigenvalues[Mat], Norm]
-]
-
-
 (* ::Section::Closed:: *)
 (*QNMFrequency*)
 
@@ -213,6 +198,17 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
 
 (* ::Subsubsection::Closed:: *)
 (*Eigenvalue difference*)
+
+
+(* Compute the eigenvalue of the Radial equation *)
+\[Lambda]r[\[Omega]_, s_Integer, m_Integer, a_, numpoints_] :=
+ Module[{Mat},
+  (* Evaluate discretized operator *)
+  Mat = \[ScriptCapitalM][s, m, a, \[Omega], -(2 a m \[Omega] - (a \[Omega])^2), numpoints];
+
+  (* Return sorted eigenvalues *)
+  SortBy[Eigenvalues[Mat], Norm]
+]
 
 
 \[Delta]\[Lambda][\[Omega]guess_, s_Integer, l_Integer, m_Integer, a_, NN_Integer] :=
