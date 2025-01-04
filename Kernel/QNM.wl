@@ -35,7 +35,7 @@ ClearAttributes[{QNMFrequency, QNMRadial, QNMRadialFunction}, {Protected, ReadPr
 QNMFrequency::usage = "QNMFrequency[s, l, m, n, a] computes a quasinormal mode frequency.";
 
 
-QNMRadial::usage = "QNMRadial[s, l, m, n, a, opts] computes the radial eigenfunction of a quasinormal mode.";
+QNMRadial::usage = "QNMRadial[s, l, m, n, a] computes the radial eigenfunction of a quasinormal mode.";
 
 
 QNMRadialFunction::usage = "QNMRadialFunction[...] is an object representing a quasinormal mode solution to the radial Teukolsky equation.";
@@ -46,14 +46,14 @@ QNMRadialFunction::usage = "QNMRadialFunction[...] is an object representing a q
 
 
 QNMFrequency::nointerp = "Interpolation data not available for s=`1`, l=`2`, m=`3`, n=`4`.";
-QNMFrequency::optx = "Unknown options in `1`";
+QNMFrequency::optx = "Unknown options in `1`.";
 QNMFrequency::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMFrequency::findroot = "FindRoot failed to converge to the requested accuracy.";
 QNMFrequency::cmplx = "Only real values of a are allowed, but a=`1` specified.";
-QNMRadial::optx = "Unknown options in `1`";
+QNMRadial::optx = "Unknown options in `1`.";
 QNMRadial::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
-QNMRadial::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal, but got `1`";
-QNMRadial::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`";
+QNMRadial::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal\", but got `1`.";
+QNMRadial::convergence = "Eigenvalue failed to converge to specified tolerance. Final value `1`.";
 QNMRadialFunction::dmval = "Radius `1` lies outside the computational domain.";
 
 
