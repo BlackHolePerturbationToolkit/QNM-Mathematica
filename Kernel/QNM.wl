@@ -76,16 +76,6 @@ DEBUG=False;
 
 
 (* ::Subsection::Closed:: *)
-(*Hyperboloidal operators*)
-
-
-\[CapitalDelta][\[Rho]_,a_]:=1-2M \[Rho]+a^2 \[Rho]^2;
-A[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=2 I \[Omega]-2(1+s)\[Rho]+2(I \[Omega](a^2-8M^2)+I m a +(s+3)M)\[Rho]^2+4(2 I \[Omega] M-1) a^2 \[Rho]^3;
-B[\[Omega]_,s_Integer,m_Integer,a_,\[Rho]_]:=(a^2-16M^2)\[Omega]^2+2(m a +2 I s M)\[Omega]+2(4(a^2-4M^2)M \[Omega]^2+(4 m a M-4I (s+2) M^2+I a^2)\[Omega]+ I m a+(s+1)M)\[Rho]+2(8 M^2 \[Omega]^2+6 I M \[Omega]-1)a^2 \[Rho]^2;
-M\[Rho][\[Omega]_,s_Integer,m_Integer,a_]:=-\[Rho]^2\[CapitalDelta][\[Rho],a]R''[\[Rho]]+A[\[Omega],s,m ,a,\[Rho]]R'[\[Rho]]+B[\[Omega],s,m ,a,\[Rho]]R[\[Rho]];
-
-
-(* ::Subsection::Closed:: *)
 (*Horizon locations*)
 
 
@@ -97,16 +87,20 @@ rm[a_, M_] := M-Sqrt[M^2-a^2];
 
 
 (* ::Subsection::Closed:: *)
-(*Discretization*)
+(*Discretised Teukolsky operator on a hyperboloidal slice*)
 
 
-(* Define the grid *)
-\[Rho]grid[a_, NN_Integer] := 1/rp[a, M] Reverse[1/2 (1+Cos[\[Pi] Subdivide[NN-1]])];
-
-
-(* Get differentiation matrices based on the grid *)
-Dgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[1], \[Rho]grid, DifferenceOrder -> "Pseudospectral", PeriodicInterpolation -> False]["DifferentiationMatrix"];
-DDgrid[\[Rho]grid_] := NDSolve`FiniteDifferenceDerivative[Derivative[2], \[Rho]grid, DifferenceOrder -> "Pseudospectral", PeriodicInterpolation -> False]["DifferentiationMatrix"];
+\[ScriptCapitalM][s_, m_, a_, \[Omega]_, \[Lambda]_, n_] :=
+ Module[{\[Rho], \[CapitalDelta], R, dR, d2R, A, B, M=1},
+  \[Rho] = 1/rp[a, M] Reverse[1/2 (1+Cos[\[Pi] Subdivide[n-1]])];
+  \[CapitalDelta] = 1-2M \[Rho]+a^2 \[Rho]^2;
+  R = IdentityMatrix[n];
+  dR  = NDSolve`FiniteDifferenceDerivative[Derivative[1], \[Rho], DifferenceOrder -> "Pseudospectral", PeriodicInterpolation -> False]["DifferentiationMatrix"];
+  d2R = NDSolve`FiniteDifferenceDerivative[Derivative[2], \[Rho], DifferenceOrder -> "Pseudospectral", PeriodicInterpolation -> False]["DifferentiationMatrix"];
+  A = 2 I \[Omega]-2(1+s)\[Rho]+2(I \[Omega](a^2-8M^2)+I m a +(s+3)M)\[Rho]^2+4(2 I \[Omega] M-1) a^2 \[Rho]^3;
+  B = (a^2-16M^2)\[Omega]^2+2(m a +2 I s M)\[Omega]+2(4(a^2-4M^2)M \[Omega]^2+(4 m a M-4I (s+2) M^2+I a^2)\[Omega]+ I m a+(s+1)M)\[Rho]+2(8 M^2 \[Omega]^2+6 I M \[Omega]-1)a^2 \[Rho]^2;
+  -\[Rho]^2 \[CapitalDelta] d2R + A dR + (B+(\[Lambda] + 2 a m \[Omega] - (a \[Omega])^2)) R
+]
 
 
 (* ::Subsection::Closed:: *)
@@ -155,18 +149,10 @@ chebInterp[data_, domain_] :=
 
 
 (* Compute the eigenvalue of the Radial equation *)
-\[Lambda]r[\[Omega]_, s_Integer, m_Integer, a_, NN_] :=
- Module[{\[Rho]grida, dd1, dd2, Mat, DiscretizationRules},
-  (* Create grid and differentiation matrices *)
-  \[Rho]grida = \[Rho]grid[a,NN];
-  dd1 = Dgrid[\[Rho]grida];
-  dd2 = DDgrid[\[Rho]grida];
-
-  (* Define discretization in terms of grids *)
-  DiscretizationRules={\[Rho]->\[Rho]grida, R''[\[Rho]]->dd2, R'[\[Rho]]->dd1, R[\[Rho]]->IdentityMatrix[NN]};
-
+\[Lambda]r[\[Omega]_, s_Integer, m_Integer, a_, numpoints_] :=
+ Module[{Mat},
   (* Evaluate discretized operator *)
-  Mat = M\[Rho][\[Omega], s, m, a] /. DiscretizationRules;
+  Mat = \[ScriptCapitalM][s, m, a, \[Omega], -(2 a m \[Omega] - (a \[Omega])^2), numpoints];
 
   (* Return sorted eigenvalues *)
   SortBy[Eigenvalues[Mat], Norm]
@@ -371,9 +357,9 @@ Options[QNMRadialHyperboloidal] = {
 
 
 QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
- Module[{\[Lambda], ev, ef, \[Rho]grida, dd1, dd2, DiscretizationRules, Mat, RadialFunction, h, h\[Phi], NN, coords},
+ Module[{\[Lambda], ef, Mat, RadialFunction, h, h\[Phi], numpoints, coords},
   (* Load options values *)
-  NN = OptionValue["NumPoints"];
+  numpoints = OptionValue["NumPoints"];
 
   (* Check a valid Coordinates option has been specified *)
   coords = OptionValue["Coordinates"];
@@ -383,30 +369,21 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
   ];
 
   (* Construct the discretized system *)
-  \[Rho]grida = \[Rho]grid[a,NN];
-  dd1 = Dgrid[\[Rho]grida];
-  dd2 = DDgrid[\[Rho]grida];
-
-  (* Define discretization in terms of grids *)
-  DiscretizationRules = {\[Rho]->\[Rho]grida, R''[\[Rho]]->dd2, R'[\[Rho]]->dd1, R[\[Rho]]->IdentityMatrix[NN]};
-
-  (* Evaluate discretized operator *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
-  ev = -(\[Lambda] + 2 a m \[Omega] - (a \[Omega])^2);
-  Mat = M\[Rho][\[Omega],s,m,a] - ev R[\[Rho]] /. DiscretizationRules;
+  Mat = \[ScriptCapitalM][s, m, a, \[Omega], \[Lambda], numpoints];
 
   (* Calculate the eigenvectors *)
   ef = First[NullSpace[Mat]];
 
   Switch[coords,
   "Hyperboloidal",
-    RadialFunction = Function[{r}, Evaluate[chebInterp[Reverse[ef/ef[[-1]]], \[Rho]grida[[{1,-1}]]][1/r]]];,
+    RadialFunction = Function[{r}, Evaluate[chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][1/r]]];,
   "BL" | "BoyerLindquist" | "Boyer\[Dash]Lindquist",
     RadialFunction = Function[{r}, Evaluate[
       With[{rp = rp[a, M], rm = rm[a, M]},
         h = (2 M rp )/(rp-rm) Log[r-rp]-(2 M rm )/(rp-rm) Log[r-rm]-r-4 M Log[r];
         h\[Phi] = a/(rp-rm) Log[(r-rp)/(r-rm)];
-        chebInterp[Reverse[ef/ef[[-1]]], \[Rho]grida[[{1,-1}]]][1/r] Exp[-I*\[Omega]*h+I*m*h\[Phi]]]]];,
+        chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][1/r] Exp[-I*\[Omega]*h+I*m*h\[Phi]]]]];,
   _,
     Message[QNMRadial::coords, coords];
     Return[$Failed];
