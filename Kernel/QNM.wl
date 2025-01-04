@@ -200,21 +200,12 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
 (*Eigenvalue difference*)
 
 
-(* Compute the eigenvalue of the Radial equation *)
-\[Lambda]r[\[Omega]_, s_Integer, m_Integer, a_, numpoints_] :=
- Module[{Mat},
-  (* Evaluate discretized operator *)
-  Mat = \[ScriptCapitalM][s, m, a, \[Omega], -(2 a m \[Omega] - (a \[Omega])^2), numpoints];
-
-  (* Return sorted eigenvalues *)
-  SortBy[Eigenvalues[Mat], Norm]
-]
-
-
-\[Delta]\[Lambda][\[Omega]guess_, s_Integer, l_Integer, m_Integer, a_, NN_Integer] :=
- Module[{\[Lambda]},
-  \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]guess];
-  -\[Lambda]r[\[Omega]guess, s, m, a, NN][[1]] - (\[Lambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2)
+(* Compute the difference between the eigenvalues of the radial and angular equations *)
+\[Delta]\[Lambda][\[Omega]_, s_Integer, l_Integer, m_Integer, a_, numpoints_] :=
+ Module[{\[Lambda], Mat},
+  \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
+  Mat = \[ScriptCapitalM][s, m, a, \[Omega], \[Lambda], numpoints];
+  Eigenvalues[Mat, -1]
 ]
 
 
