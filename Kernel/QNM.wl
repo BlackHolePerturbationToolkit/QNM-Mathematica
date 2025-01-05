@@ -187,7 +187,7 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
   If[\[Omega]guess === Automatic,
     \[Omega]guess = Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp];
   ];
-  inInc[\[Omega]_?NumericQ] := TeukolskyRadial[s, l, m, a, \[Omega], Method -> "MST"]["In"]["Amplitudes"]["Incidence"];
+  inInc[\[Omega]_?NumericQ] := inInc[\[Omega]] = TeukolskyRadial[s, l, m, a, \[Omega], Method -> "MST"]["In"]["Amplitudes"]["Incidence"];
   \[Omega]QNM /. FindRoot[inInc[\[Omega]QNM], {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec]
 ];
 
@@ -206,7 +206,7 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
   If[\[Omega]guess === Automatic,
     \[Omega]guess = Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp];
   ];
-  \[Delta]\[Lambda][\[Omega]_?NumericQ] := Module[{\[Lambda], Mat},
+  \[Delta]\[Lambda][\[Omega]_?NumericQ] := \[Delta]\[Lambda][\[Omega]] = Module[{\[Lambda], Mat},
     \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
     Mat = \[ScriptCapitalM][s, m, a, \[Omega], \[Lambda], numpoints];
     Eigenvalues[Mat, -1]
