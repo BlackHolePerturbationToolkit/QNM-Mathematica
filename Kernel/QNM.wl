@@ -196,73 +196,22 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
 (*Hyperboloidal method*)
 
 
-(* ::Subsubsection::Closed:: *)
-(*Eigenvalue difference*)
+Options[QNMFrequencyHyperboloidal] = {"NumPoints" -> 32, "InitialGuess" -> Automatic};
 
 
-(* Compute the difference between the eigenvalues of the radial and angular equations *)
-\[Delta]\[Lambda][\[Omega]_, s_Integer, l_Integer, m_Integer, a_, numpoints_] :=
- Module[{\[Lambda], Mat},
-  \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
-  Mat = \[ScriptCapitalM][s, m, a, \[Omega], \[Lambda], numpoints];
-  Eigenvalues[Mat, -1]
-]
-
-
-(* ::Subsubsection::Closed:: *)
-(*Define function options*)
-
-
-Options[QNMFrequencyHyperboloidal] = {"Tolerance"->10^-6, "NumPoints"->100, "InitialGuess"->Automatic};
-
-
-(* ::Subsubsection::Closed:: *)
-(*Newton Raphson solver*)
-
-
-(*CP commment: the algorithm solves for the separation constant, while SpinWeightedSpheroidalEigenvalue gives the Angular eigenvalue: SeparationConstant= (SpinWeightedSpheroidalEigenvalue+2 m a \[Omega]guess- (a \[Omega]guess)^2) *)
 QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]] :=
- Module[
-	{\[Lambda],\[Omega]guess,F,Fp,\[Epsilon],\[Gamma],\[Delta]\[Omega],tol,NN,MAXITS,count,monitor},
-		(* Load option values *)
-		tol = OptionValue["Tolerance"];
-		NN = OptionValue["NumPoints"];
-		(* Debug *)
-		If[DEBUG,
-		Print["Calculating QNMFrequency with tolerance ", N[tol], " for ", NN, " gridpoints."]
-		];
-		\[Omega]guess=OptionValue["InitialGuess"];
-		If[\[Omega]guess === Automatic,
-		  \[Omega]guess = SetPrecision[Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp], Precision[a]];
-		];
-		If[DEBUG,
-		monitor = PrintTemporary["Eigenvalue: ", Dynamic[\[Omega]guess]];
-		];
-		\[Delta]\[Omega]=1;
-		\[Epsilon]=10^-8;(*better way?*)
-		\[Gamma]=1;(*allow this to change?*)
-		
-		(* Iterate until tolerance is reached or maximum iterations *)
-		MAXITS=1000;
-		count = 0;
-		Until[Norm[\[Delta]\[Omega]]<tol,
-			count += 1;
-			F=\[Delta]\[Lambda][\[Omega]guess, s,l, m, a,NN];
-			Fp=(\[Delta]\[Lambda][\[Omega]guess+\[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-\[Epsilon], s,l, m, a,NN])/(2 \[Epsilon])+(\[Delta]\[Lambda][\[Omega]guess+I \[Epsilon], s,l, m, a,NN]-\[Delta]\[Lambda][\[Omega]guess-I \[Epsilon], s,l, m, a,NN])/(2 \[Epsilon] I);
-			\[Omega]guess= \[Omega]guess-(\[Gamma] F)/Fp;
-			\[Delta]\[Omega]= -(\[Gamma] F)/Fp;
-						
-			If[count > MAXITS, 
-				Message[QNMRadial::convergence, \[Omega]guess];
-				Return[$Failed];
-			];
-		];
-		If[DEBUG,
-		NotebookDelete[monitor];
-		];
-		
-		(* Once result is obtained, return eigenvalue & separation constant *)
-		\[Lambda] = SpinWeightedSpheroidalEigenvalue[s,l,m,a \[Omega]guess];
+ Module[{\[Omega]guess, \[Omega]QNM, \[Delta]\[Lambda], numpoints, prec = Precision[a]},
+  numpoints = OptionValue["NumPoints"];
+  \[Omega]guess=OptionValue["InitialGuess"];
+  If[\[Omega]guess === Automatic,
+    \[Omega]guess = Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp];
+  ];
+  \[Delta]\[Lambda][\[Omega]_?NumericQ] := Module[{\[Lambda], Mat},
+    \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
+    Mat = \[ScriptCapitalM][s, m, a, \[Omega], \[Lambda], numpoints];
+    Eigenvalues[Mat, -1]
+  ];
+  \[Omega]guess = \[Omega]QNM /. FindRoot[\[Delta]\[Lambda][\[Omega]QNM], {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec];
 		<|"QNMfrequency"->\[Omega]guess,"SeparationConstant"->\[Lambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2|>
 ];
 
