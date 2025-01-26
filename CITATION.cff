@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+title: QNM
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file and by including the
+  acknowledgment "This work makes use of the Black Hole
+  Perturbation Toolkit." in any papers.
+type: software
+authors:
+  - given-names: Barry
+    family-names: Wardell
+    email: barry.wardell@gmail.com
+    orcid: 'https://orcid.org/0000-0001-6176-9006'
+    affiliation: University College Dublin
+  - given-names: Christiana
+    family-names: Pantelidou
+    email: christiana.pantelidou@ucd.ie
+    affiliation: University College Dublin
+    orcid: 'https://orcid.org/0000-0002-7983-8636'
+  - given-names: Brad
+    family-names: Cownden
+    email: brad.cownden@ucd.ie
+    orcid: 'https://orcid.org/0000-0002-5831-1384'
+    affiliation: University College Dublin
+  - given-names: Jake
+    name-particle: Mac
+    family-names: Uilliam
+    orcid: 'https://orcid.org/0009-0003-5172-2126'
+    email: jake.williams@ucd.ie
+    affiliation: University College Dublin
+repository-code: 'https://github.com/BlackHolePerturbationToolkit/QNM-Mathematica'
+url: 'http://bhptoolkit.org/QNM-Mathematica/'
+abstract: >-
+  A Mathematica package for computing quasinormal mode
+  solutions to the Teukolsky equation.
+license: MIT
+version: 0.1.0
