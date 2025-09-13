@@ -234,7 +234,7 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
   \[Omega]QNM = \[Omega] /. FindRoot[\[Delta]\[Lambda][\[Omega]], {\[Omega], SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec];
 
   If[OptionValue["AccuracyCheck"] == True &&
-     Abs[TeukolskyRadial[s, l, m, a, \[Omega]QNM, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]/TeukolskyRadial[s, l, m, a, \[Omega]guess, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]] > 10^3,
+     Abs[TeukolskyRadial[s, l, m, If[a==0, 0, a], \[Omega]QNM, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]/TeukolskyRadial[s, l, m, If[a==0, 0, a], \[Omega]guess, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]] > 10^3,
     Message[QNMFrequency::acc, \[Omega]QNM, \[Omega]guess];
   ];
 
@@ -322,7 +322,7 @@ Options[QNMRadialHyperboloidal] = {
 
 
 QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
- Module[{\[Lambda], ef, Mat, RadialFunction, h, h\[Phi], numpoints, coords},
+ Module[{\[Lambda], ef, ns, Mat, RadialFunction, h, h\[Phi], numpoints, coords},
   (* Load options values *)
   numpoints = OptionValue["NumPoints"];
 
@@ -338,7 +338,11 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
   Mat = \[ScriptCapitalM][s, m, a, \[Omega], \[Lambda], numpoints];
 
   (* Calculate the eigenvectors *)
-  ef = First[NullSpace[Mat]];
+  ns = NullSpace[Mat];
+  If[Length[ns]==0,
+    ef = Eigensystem[Mat][[2, -1]];,
+    ef = First[ns];
+  ];
 
   Switch[coords,
   "Hyperboloidal",
