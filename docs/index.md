@@ -22,7 +22,7 @@ Additional documentation can be found in the Mathematica documentation included 
 
 ## Citing
 
-[![DOI](https://zenodo.org/badge/DOI/XXXX)](https://doi.org/XXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17114757.svg)](https://doi.org/10.5281/zenodo.17114757)
 
 In addition to acknowledging the Black Hole Perturbation Toolkit as suggested on the [front page](https://bhptoolkit.org) we also recommend citing the specific package version you use via the citation information on the package’s Zenodo page linked from the above DOI.
 
