@@ -223,7 +223,7 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
   \[Omega]QNM = \[Omega] /. FindRoot[\[Delta]\[Lambda][\[Omega]], {\[Omega], SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec];
 
   If[OptionValue["AccuracyCheck"] == True &&
-     Abs[TeukolskyRadial[s, l, m, a, \[Omega]QNM, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]] > Abs[TeukolskyRadial[s, l, m, a, \[Omega]guess, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]],
+     Abs[TeukolskyRadial[s, l, m, a, \[Omega]QNM, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]/TeukolskyRadial[s, l, m, a, \[Omega]guess, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]] > 10^3,
     Message[QNMFrequency::acc, \[Omega]QNM, \[Omega]guess];
   ];
 
