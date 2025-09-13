@@ -50,6 +50,7 @@ QNMFrequency::optx = "Unknown options in `1`.";
 QNMFrequency::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMFrequency::findroot = "FindRoot failed to converge to the requested accuracy.";
 QNMFrequency::cmplx = "Only real values of a are allowed, but a=`1` specified.";
+QNMFrequency::acc = "Accuracy of the calculated quasinormal mode frequency `1` is lower than that of the initial guess `2`.";
 QNMRadial::optx = "Unknown options in `1`.";
 QNMRadial::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMRadial::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal\", but got `1`.";
@@ -196,11 +197,11 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
 (*Hyperboloidal method*)
 
 
-Options[QNMFrequencyHyperboloidal] = {"NumPoints" -> 32, "InitialGuess" -> Automatic};
+Options[QNMFrequencyHyperboloidal] = {"NumPoints" -> 32, "InitialGuess" -> Automatic, "AccuracyCheck" -> True};
 
 
 QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]] :=
- Module[{\[Omega]guess, \[Omega]QNM, \[Delta]\[Lambda], numpoints, prec = Precision[a]},
+ Module[{\[Omega]guess, \[Omega]QNM, \[Omega], \[Delta]\[Lambda], numpoints, prec = Precision[a]},
   numpoints = OptionValue["NumPoints"];
   \[Omega]guess=OptionValue["InitialGuess"];
   If[\[Omega]guess === Automatic,
@@ -211,8 +212,14 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
     Mat = \[ScriptCapitalM][s, m, a, \[Omega], \[Lambda], numpoints];
     Eigenvalues[Mat, -1]
   ];
-  \[Omega]guess = \[Omega]QNM /. FindRoot[\[Delta]\[Lambda][\[Omega]QNM], {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec];
-		<|"QNMfrequency"->\[Omega]guess,"SeparationConstant"->\[Lambda]+2 m a \[Omega]guess- (a \[Omega]guess)^2|>
+  \[Omega]QNM = \[Omega] /. FindRoot[\[Delta]\[Lambda][\[Omega]], {\[Omega], SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec];
+
+  If[OptionValue["AccuracyCheck"] == True &&
+     Abs[TeukolskyRadial[s, l, m, a, \[Omega]QNM, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]] > Abs[TeukolskyRadial[s, l, m, a, \[Omega]guess, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]],
+    Message[QNMFrequency::acc, \[Omega]QNM, \[Omega]guess];
+  ];
+
+  \[Omega]QNM
 ];
 
 
@@ -259,13 +266,13 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
       ];
       \[Omega] = QNMFrequencyInIncidenceAmplitude[s, l, m, n, a, opts];,
     Automatic | "Hyperboloidal",
-      \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a]["QNMfrequency"];,
+      \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a];,
     {"Hyperboloidal", Rule[_,_]...},
 	  opts = FilterRules[Rest[OptionValue[Method]], Options[QNMFrequencyHyperboloidal]];
       If[opts =!= Rest[OptionValue[Method]],
         Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       ];
-      \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a, opts]["QNMfrequency"];,
+      \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a, opts];,
     _,
       Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       \[Omega] = $Failed;
