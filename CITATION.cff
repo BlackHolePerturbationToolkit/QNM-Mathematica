@@ -9,7 +9,7 @@ type: software
 authors:
   - given-names: Barry
     family-names: Wardell
-    email: barry.wardell@gmail.com
+    email: barry.wardell@ucd.ie
     orcid: 'https://orcid.org/0000-0001-6176-9006'
     affiliation: University College Dublin
   - given-names: Christiana
