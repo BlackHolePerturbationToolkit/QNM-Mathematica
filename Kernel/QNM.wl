@@ -153,7 +153,7 @@ prec[a_] :=
  Which[
    a != 0,
    Precision[a],
-   a == 0 && (Precision[a] == MachinePrecision || Precision[a] == \[Infinity]),
+   a == 0 && Precision[a] == MachinePrecision,
    MachinePrecision,
    a == 0,
    Accuracy[a]
@@ -300,6 +300,9 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
 ];
 
 
+QNMFrequency[s_, l_, m_, n_, 0, opts___] := QNMFrequency[s, l, m, n, 0.0, opts];
+
+
 QNMFrequency /: N[QNMFrequency[s_, l_, m_, n_, a_?NumericQ, opts:OptionsPattern[]], Nopts___] :=
   QNMFrequency[s, l, m, n, N[a, Nopts], opts];
 
@@ -384,7 +387,7 @@ QNMRadial[s_, l_, m_, n_, a_Complex, OptionsPattern[]] :=
  (Message[QNMRadial::cmplx, a]; $Failed);
 
 
-QNMRadial[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a:(_?InexactNumberQ|0), OptionsPattern[]] :=
+QNMRadial[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a_?InexactNumberQ, OptionsPattern[]] :=
  Module[{\[Omega], opts, qnm},
   (* Get the frequency *)
   If[OptionValue["Frequency"] === Automatic,
@@ -407,6 +410,9 @@ QNMRadial[s_?NumericQ, l_?NumericQ, m_?NumericQ, n_?NumericQ, a:(_?InexactNumber
   ];
   qnm
 ]
+
+
+QNMRadial[s_, l_, m_, n_, 0, opts___] := QNMRadial[s, l, m, n, 0.0, opts];
 
 
 (* ::Section::Closed:: *)
