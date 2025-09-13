@@ -149,6 +149,17 @@ chebInterp[data_, domain_] :=
 (*QNMFrequency*)
 
 
+prec[a_] :=
+ Which[
+   a != 0,
+   Precision[a],
+   a == 0 && (Precision[a] == MachinePrecision || Precision[a] == \[Infinity]),
+   MachinePrecision,
+   a == 0,
+   Accuracy[a]
+ ];
+
+
 (* ::Subsection::Closed:: *)
 (*Interpolation of tabulated QNM frequencies*)
 
@@ -183,7 +194,7 @@ Options[QNMFrequencyInIncidenceAmplitude] = {"InitialGuess" -> Automatic};
 
 
 QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, OptionsPattern[]] :=
- Module[{\[Omega]guess, \[Omega]QNM, inInc, prec = Precision[a]},
+ Module[{\[Omega]guess, \[Omega]QNM, inInc, prec = prec[a]},
   \[Omega]guess=OptionValue["InitialGuess"];
   If[\[Omega]guess === Automatic,
     \[Omega]guess = Quiet[QNMFrequencyInterpolation[s, l, m, n][a], QNMFrequency::nointerp];
@@ -192,7 +203,7 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
     Message[QNMFrequency::nointerp, s, l, m, n];
     Return[$Failed];
   ];
-  inInc[\[Omega]_?NumericQ] := inInc[\[Omega]] = TeukolskyRadial[s, l, m, a, \[Omega], Method -> "MST"]["In"]["Amplitudes"]["Incidence"];
+  inInc[\[Omega]_?NumericQ] := inInc[\[Omega]] = TeukolskyRadial[s, l, m, If[a==0, 0, a], \[Omega], Method -> "MST"]["In"]["Amplitudes"]["Incidence"];
   \[Omega]QNM /. FindRoot[inInc[\[Omega]QNM], {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec]
 ];
 
@@ -205,7 +216,7 @@ Options[QNMFrequencyHyperboloidal] = {"NumPoints" -> 32, "InitialGuess" -> Autom
 
 
 QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:OptionsPattern[]] :=
- Module[{\[Omega]guess, \[Omega]QNM, \[Omega], \[Delta]\[Lambda], numpoints, prec = Precision[a]},
+ Module[{\[Omega]guess, \[Omega]QNM, \[Omega], \[Delta]\[Lambda], numpoints, prec = prec[a]},
   numpoints = OptionValue["NumPoints"];
   \[Omega]guess=OptionValue["InitialGuess"];
   If[\[Omega]guess === Automatic,
