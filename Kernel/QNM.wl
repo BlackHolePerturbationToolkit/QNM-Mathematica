@@ -342,8 +342,8 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
 
   (* Return QNMRadialFunction *)
   QNMRadialFunction[<|"s" -> s, "l" -> l, "m" -> m, "n" -> n, "a" -> a, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
-    "Method" -> "SpectralHyperboloidal", "RadialFunction" -> RadialFunction,
-    "Coordinates" -> coords, "Domain" -> {rp[a, 1], \[Infinity]}|>]
+    "Method" -> "SpectralHyperboloidal", "Amplitudes" -> <|"\[ScriptCapitalH]" -> ef[[-1]]/ef[[-1]], "\[ScriptCapitalI]" -> ef[[1]]/ef[[-1]]|>, "RadialFunction" -> RadialFunction,
+    "Coordinates" -> coords, "Domain" -> {rp[a, M], \[Infinity]}|>]
 ]
 
 
