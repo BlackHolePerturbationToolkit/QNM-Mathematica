@@ -169,7 +169,7 @@ QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] := QNMFrequency
   If[MatchQ[data, <|"a"->_, "omega"->_|>],
     ret = Interpolation[Transpose[Lookup[data, {"a","omega"}]], opts];,
     Message[QNMFrequency::nointerp, s, l, m, n];
-    ret = $Failed;
+    ret = Function[{a}, $Failed];
   ];
   ret
 ];
@@ -186,7 +186,11 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
  Module[{\[Omega]guess, \[Omega]QNM, inInc, prec = Precision[a]},
   \[Omega]guess=OptionValue["InitialGuess"];
   If[\[Omega]guess === Automatic,
-    \[Omega]guess = Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp];
+    \[Omega]guess = Quiet[QNMFrequencyInterpolation[s, l, m, n][a], QNMFrequency::nointerp];
+  ];
+  If[\[Omega]guess == $Failed, 
+    Message[QNMFrequency::nointerp, s, l, m, n];
+    Return[$Failed];
   ];
   inInc[\[Omega]_?NumericQ] := inInc[\[Omega]] = TeukolskyRadial[s, l, m, a, \[Omega], Method -> "MST"]["In"]["Amplitudes"]["Incidence"];
   \[Omega]QNM /. FindRoot[inInc[\[Omega]QNM], {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec]
@@ -205,7 +209,11 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
   numpoints = OptionValue["NumPoints"];
   \[Omega]guess=OptionValue["InitialGuess"];
   If[\[Omega]guess === Automatic,
-    \[Omega]guess = Check[QNMFrequencyInterpolation[s, l, m, n][a], 1, QNMFrequency::nointerp];
+    \[Omega]guess = Quiet[QNMFrequencyInterpolation[s, l, m, n][a], QNMFrequency::nointerp];
+  ];
+  If[\[Omega]guess == $Failed, 
+    Message[QNMFrequency::nointerp, s, l, m, n];
+    Return[$Failed];
   ];
   \[Delta]\[Lambda][\[Omega]_?NumericQ] := \[Delta]\[Lambda][\[Omega]] = Module[{\[Lambda], Mat},
     \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
