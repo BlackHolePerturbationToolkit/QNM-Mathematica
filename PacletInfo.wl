@@ -21,6 +21,7 @@ Paclet[
       {
         "Guides/QNM"
       }
-    }
+    },
+    {"Asset", "Root" -> ".", "Assets" -> {{"Data", "Data"}}}
   }
 ]
