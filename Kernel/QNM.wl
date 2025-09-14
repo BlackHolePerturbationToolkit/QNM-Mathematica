@@ -50,6 +50,7 @@ QNMFrequency::optx = "Unknown options in `1`.";
 QNMFrequency::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMFrequency::findroot = "FindRoot failed to converge to the requested accuracy.";
 QNMFrequency::cmplx = "Only real values of a are allowed, but a=`1` specified.";
+QNMFrequency::nokerr = "Method \"Large-n Asymptotic\" only supported for Schwarzschild spacetime, but a=`1` specified.";
 QNMFrequency::acc = "Accuracy of the calculated quasinormal mode frequency `1` is lower than that of the initial guess `2`.";
 QNMRadial::optx = "Unknown options in `1`.";
 QNMRadial::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
@@ -145,6 +146,42 @@ chebInterp[data_, domain_] :=
 ];
 
 
+(* ::Subsection::Closed:: *)
+(*Functions for Leaver's method*)
+
+
+\[Beta][s_] := s^2 -1;
+k1[m_, s_] := 1/2 Abs[m-s];
+k2[m_, s_] := 1/2 Abs[m+s];
+
+
+(* ::Subsubsection::Closed:: *)
+(*Schwarzschild*)
+
+
+(* Functions for the Continued Fraction used in Leaver's method for Schwarzschild *)
+\[Alpha][i_, \[Omega]_]  := i^2 - 4 M I \[Omega] i + 2 i - 4 M I \[Omega] + 1;
+\[Delta][i_, \[Omega]_,s_, l_] := -2 i^2 - (2 - 16 M I \[Omega])i + 32 M^2 \[Omega]^2 + 8 M I \[Omega] - l(l + 1) + \[Beta][s];
+\[Gamma][i_, \[Omega]_, s_] := i^2 - 8 M I \[Omega] i - 16 M^2 \[Omega]^2 - \[Beta][s] - 1;
+
+
+(* ::Subsubsection::Closed:: *)
+(*Kerr*)
+
+
+b[a_] := Sqrt[4 M^2 - 4 a^2];
+
+
+(* Functions for the Continued Fraction used in Leaver's method for Kerr *)
+\[Alpha]freq[i_,\[Omega]_, s_, m_, a_]:= i^2 + (2-s-2 M I \[Omega] -2 I/b[a] (2 M^2 \[Omega] - a m))i + 1 - s - 2 M I \[Omega] -2 I/b[a] (2 M^2 \[Omega] - a m);
+\[Beta]freq[i_,\[Omega]_, Alm_, s_, m_, a_]:= -2 i^2 +(-2 + 2(4 M + b[a]) I \[Omega] + 4 I/b[a] (2 M^2 \[Omega] - a m)) i + (16 M^2 + 4 M b[a] - a^2) \[Omega]^2 - s - 1 - 2 a m \[Omega] - Alm +(4 M + b[a]) I \[Omega] + (8 M \[Omega] + 2 I)/b[a] (2 M^2 \[Omega] - a m);
+\[Gamma]freq[i_, \[Omega]_, s_, m_, a_]:= i^2 + (s - 6 M I \[Omega] - 2 I/b[a] (2 M^2 \[Omega] - a m)) i - 8 M^2 \[Omega]^2 - 4 M I \[Omega] s - 8 M \[Omega]/b[a] (2 M^2 \[Omega] - a m);
+
+\[Alpha]ang[i_, \[Omega]_, s_, m_, a_]:= -2 (i + 1) (i + 2 k1[m, s] + 1);
+\[Beta]ang[i_, \[Omega]_, Alm_, s_, m_, a_]:= i (i - 1) + 2 i (k1[m, s] + k2[m, s] + 1 - 2 a \[Omega]) - (2 a \[Omega] (2 k1[m, s] + s + 1) - (k1[m, s] + k2[m, s]) (k1[m, s] + k2[m, s] + 1)) - (a^2 \[Omega]^2 + s(s+1) + Alm);
+\[Gamma]ang[i_, \[Omega]_, s_, m_, a_]:= 2 a \[Omega] (i + k1[m, s] + k2[m, s] + s);
+
+
 (* ::Section::Closed:: *)
 (*QNMFrequency*)
 
@@ -158,6 +195,64 @@ prec[a_] :=
    a == 0,
    Accuracy[a]
  ];
+
+
+(* ::Subsection::Closed:: *)
+(*Asymptotic approximations*)
+
+
+(* ::Text:: *)
+(*Multiple asymptotic expansions are used for Schwarzschild, with different expansions providing better approximations for different values of l and n.*)
+
+
+(* ::Subsubsection::Closed:: *)
+(*Schwarzschild asymptotic expansion for l >> n, l>> 1*)
+
+
+(* ::Text:: *)
+(*This expansion is taken from Dolan, Ottewill, Classical and Quantum Gravity, Vol. 26, 2009.*)
+
+
+Schwarzfinit1[s_, l_, n_]:= ((I*(n+1/2)*(\[Beta][s]^2/27 + (\[Beta][s]*(1100*(n+1/2)^2 - 2719))/46656 + (11273136*(n+1/2)^4 - 52753800*(n+1/2)^2 + 66480535)/2902376448))/(l+1/2)^4 + 
+   (-(\[Beta][s]^2/27) + (\[Beta][s]*(204*(n+1/2)^2 + 211))/3888 + (854160*(n+1/2)^4 - 1664760*(n+1/2)^2 - 776939)/40310784)/(l+1/2)^3 - (I*(n+1/2)*(\[Beta][s]/9 + (235*(n+1/2)^2)/3888 - 1415/15552))/(l+1/2)^2 + 
+   (\[Beta][s]/3 - (5*(n+1/2)^2)/36 - 115/432)/(l+1/2) + (l+1/2) - I*(n+1/2))/(Sqrt[27]*M);
+
+
+(* ::Subsubsection::Closed:: *)
+(*Schwarzschild low order asymptotic expansion for n>>l, n>>1*)
+
+
+(* ::Text:: *)
+(*The expansion is taken from Casals, Dolan, Ottewill, Wardell, Phys. Rev. D, Vol. 88, 2013*)
+
+
+Schwarzfinit2[n_] := Log[3]/(8 \[Pi] M) - I (n+1/2)/(4 M);
+
+
+(* ::Subsubsection::Closed:: *)
+(*Kerr*)
+
+
+(* ::Text:: *)
+(*For Kerr, an initial guess is needed for both the frequency and the spheroidal eigenvalue Subscript[A, lm].*)
+
+
+Kerrfinit[s_, l_, m_, n_, a_] :=
+ Module[{b, \[CapitalDelta], \[Mu], Eikonal, Rp, \[CapitalOmega]r, \[CapitalOmega]i, finit},
+  \[CapitalDelta][r_] := r^2 -2 M r + a^2;
+  \[Mu] = m/(l+1/2);(* Useful parameter *)
+  Eikonal[rp_]:= 2(rp/M)^4(rp/M - 3)^2 + 4 (rp/M)^2((1 - \[Mu]^2)(rp/M)^2 - 2(rp/M) - 3(1 - \[Mu]^2))(a/M)^2 + (1 - \[Mu]^2) ( (2 - \[Mu]^2) (rp/M)^2 + 2 (2 + \[Mu]^2) (rp/M) + (2 - \[Mu]^2)) (a/M)^4;
+
+  Rp = FindRoot[Eikonal[rp]==0, {rp, 3}] [[1]][[2]]; (* FIXME: This always produces a machine-precision result. Maybe use Solve instead? *)
+
+  \[CapitalOmega]r = -If[\[Mu] == 0, \[Pi]/2 Sqrt[\[CapitalDelta][Rp]]/((Rp^2 + a^2) EllipticE[(a^2 \[CapitalDelta][Rp])/((Rp^2 + a^2)^2)] ) , (M - Rp) \[Mu] a / ((Rp - 3M)Rp^2 + (Rp + M) a^2)];
+  \[CapitalOmega]i = \[CapitalDelta][Rp](Sqrt[4(6Rp^2 \[CapitalOmega]r^2 -1) + 2a^2\[CapitalOmega]r^2(3 - \[Mu]^2)])/(2 Rp^4 \[CapitalOmega]r - 4 a M Rp \[Mu] + a^2 Rp \[CapitalOmega]r(Rp(3 - \[Mu]^2) + 2 M(1+\[Mu]^2)) + a^4\[CapitalOmega]r(1-\[Mu]^2));
+
+  finit = (l + 1/2) Abs[\[CapitalOmega]r] - I (n + 1/2) Abs[\[CapitalOmega]i]
+];
+
+
+KerrAinit[s_, l_, m_, n_, a_] := (l+1/2)^2 - (a Kerrfinit[s, l, m, n, a])^2 /2 (1 - (m/(l+1/2))^2);
 
 
 (* ::Subsection::Closed:: *)
@@ -292,6 +387,18 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
         Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       ];
       \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a, opts];,
+    "Large-l Asymptotic",
+      If[a == 0,
+        \[Omega] = Schwarzfinit1[s, l, n];,
+        \[Omega] = Kerrfinit[s, l, m, n, a];
+      ];,
+    "Large-n Asymptotic",
+      If[a!=0,
+        Message[QNMFrequency::nokerr, a];
+        \[Omega] = $Failed;
+        ,
+        \[Omega] = Schwarzfinit2[n];
+      ];,
     _,
       Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       \[Omega] = $Failed;
