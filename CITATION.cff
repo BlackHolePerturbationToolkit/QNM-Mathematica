@@ -28,6 +28,15 @@ authors:
     orcid: 'https://orcid.org/0009-0003-5172-2126'
     email: jake.williams@ucd.ie
     affiliation: University College Dublin
+  - given-names: Conor
+    family-names: O'Toole
+    email: conor.o-toole.1@ucdconnect.ie
+    affiliation: University College Dublin
+  - given-names: Rodrigo
+    family-names: Macedo
+    orcid: 'https://orcid.org/0000-0003-2942-5080'
+    email: rodrigo.macedo@nbi.ku.dk
+    affiliation: Niels Bohr Institute
 identifiers:
   - type: doi
     value: 10.5281/zenodo.17114757
@@ -38,4 +47,4 @@ abstract: >-
   A Mathematica package for computing quasinormal mode
   solutions to the Teukolsky equation.
 license: MIT
-version: 0.1.0
+version: 0.2.0
