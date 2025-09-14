@@ -308,7 +308,7 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
     ];
   ];
   inInc[\[Omega]_?NumericQ] := inInc[\[Omega]] = TeukolskyRadial[s, l, m, If[a==0, 0, a], \[Omega], Method -> "MST"]["In"]["Amplitudes"]["Incidence"];
-  \[Omega]QNM /. FindRoot[inInc[\[Omega]QNM], {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec]
+  \[Omega]QNM /. Quiet[Check[FindRoot[inInc[\[Omega]QNM], {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec], \[Omega]QNM -> $Failed, FindRoot::nlnum], FindRoot::nlnum]
 ];
 
 
