@@ -52,6 +52,7 @@ QNMFrequency::findroot = "FindRoot failed to converge to the requested accuracy.
 QNMFrequency::cmplx = "Only real values of a are allowed, but a=`1` specified.";
 QNMFrequency::nokerr = "Method \"`1`\" only supported for Schwarzschild spacetime, but a=`2` specified.";
 QNMFrequency::acc = "Accuracy of the calculated quasinormal mode frequency `1` is lower than that of the initial guess `2`.";
+QNMFrequency::noacc = "Failed estimating accuracy of the calculated quasinormal mode frequency `1` compared to the initial guess `2`.";
 QNMRadial::optx = "Unknown options in `1`.";
 QNMRadial::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMRadial::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal\", but got `1`.";
@@ -345,7 +346,9 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
   \[Omega]QNM = \[Omega] /. FindRoot[\[Delta]\[Lambda][\[Omega]], {\[Omega], SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec];
 
   If[OptionValue["AccuracyCheck"] == True &&
-     Abs[TeukolskyRadial[s, l, m, If[a==0, 0, a], \[Omega]QNM, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]/TeukolskyRadial[s, l, m, If[a==0, 0, a], \[Omega]guess, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]] > 10^3,
+     Quiet[Check[Abs[TeukolskyRadial[s, l, m, If[a==0, 0, a], \[Omega]QNM, Method -> "MST"]["In"]["Amplitudes"]["Incidence"] / 
+               TeukolskyRadial[s, l, m, If[a==0, 0, a], \[Omega]guess, Method -> "MST"]["In"]["Amplitudes"]["Incidence"]] > 10^3,
+           Message[QNMFrequency::noacc, \[Omega]QNM, \[Omega]guess]; False], All, QNMFrequency::noacc],
     Message[QNMFrequency::acc, \[Omega]QNM, \[Omega]guess];
   ];
 
