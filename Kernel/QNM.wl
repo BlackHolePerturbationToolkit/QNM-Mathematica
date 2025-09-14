@@ -50,7 +50,7 @@ QNMFrequency::optx = "Unknown options in `1`.";
 QNMFrequency::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMFrequency::findroot = "FindRoot failed to converge to the requested accuracy.";
 QNMFrequency::cmplx = "Only real values of a are allowed, but a=`1` specified.";
-QNMFrequency::nokerr = "Method \"Large-n Asymptotic\" only supported for Schwarzschild spacetime, but a=`1` specified.";
+QNMFrequency::nokerr = "Method \"`1`\" only supported for Schwarzschild spacetime, but a=`2` specified.";
 QNMFrequency::acc = "Accuracy of the calculated quasinormal mode frequency `1` is lower than that of the initial guess `2`.";
 QNMRadial::optx = "Unknown options in `1`.";
 QNMRadial::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
@@ -304,7 +304,7 @@ QNMFrequencyInIncidenceAmplitude[s_Integer, l_Integer, m_Integer, n_, a_, Option
 
 
 (* ::Subsection::Closed:: *)
-(*Hyperboloidal method*)
+(*Ripley Hyperboloidal method*)
 
 
 Options[QNMFrequencyHyperboloidal] = {"NumPoints" -> 32, "InitialGuess" -> Automatic, "AccuracyCheck" -> True};
@@ -337,6 +337,70 @@ QNMFrequencyHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, a_, opts:O
 ];
 
 
+(* ::Subsection::Closed:: *)
+(*Ansorg-Macedo hyperboloidal method*)
+
+
+(* ::Text:: *)
+(*Spectral method using hyperboloidal slicing. This technique was adapted from a Reissner-Nordstrom version kindly provided by Rodrigo Macedo, Queen Mary University of London. The technique is outlined in detail in Ansorg, Macedo, Phys. Rev. D, Vol. 93, 2016*)
+
+
+SpectralInitialGuess[s_, l_, n_] :=
+ Module[{L1a, L1b, L2a, L2b, L2c, Prec, Ndiv, ndiv, \[Sigma], \[Sigma]0, \[Sigma]1, \[CapitalDelta]\[Sigma], x, Id, Z, c, d\[Sigma], D\[Sigma], D2\[Sigma], L1, L2, M, Eigens, Filtered, sPattern},
+  (* Operators appearing in the wave equation in coordinates (\[Tau], \[Sigma]), excluding radial derivatives *)
+  L1a = -((2 \[Sigma])/(\[Sigma]+1));
+  L1b = (1-2\[Sigma]^2)/(\[Sigma]+1);
+  L2a = (-l(l+1) - \[Sigma](1-s^2))/(\[Sigma]+1);
+  L2b = (\[Sigma](2-3\[Sigma]))/(\[Sigma]+1);
+  L2c = (\[Sigma]^2 (1-\[Sigma]))/(\[Sigma]+1);
+
+  Prec = 100; (*Numerical precision, machine precision found to be insufficient*)
+	  		(* Make optional for users to set? Requires more testing as well *)
+  If[n > 2, Ndiv = 6n, Ndiv = 20]; (* Subdivision of radial domain \[Sigma] \[Element] [0,1] used for discretization of radial derivs *)
+  ndiv = Ndiv + 1; (* Matrix dimension *)
+
+  \[Sigma]0 = 0;
+  \[Sigma]1 = 1;
+  \[CapitalDelta]\[Sigma] = \[Sigma]1-\[Sigma]0;
+
+  (* The method for discretizing the radial derivatives is detailed in Spectral Methods in Matlab, Lloyd N. Trefethen *)
+  x[i_]:= Cos[(i \[Pi])/Ndiv]; (* Chebyshev points *)
+  \[Sigma] = N[Table[\[Sigma]0 + \[CapitalDelta]\[Sigma]  (1+x[i])/2, {i, 0, Ndiv}], Prec]; (* Radial coordinate grid *)
+
+  Id = IdentityMatrix[ndiv];
+  Z = ConstantArray[0, {ndiv, ndiv}]; (* Zero matrix *)
+  c[i_] := If[i(i-Ndiv) ==0, 2, 1];
+
+  (* Radial derivative using Chebyshev-Lobatto method *)
+  d\[Sigma][i_, j_] := 2/\[CapitalDelta]\[Sigma] Which[i==j && i == 0, (2 Ndiv^2+1)/6, i==j && i == Ndiv, -((2 Ndiv^2+1)/6), i==j,  -x[i]/(2(1-x[i]^2)) , i!=j, c[i]/c[j] (-1)^(i+j)/(x[i]-x[j])] ;
+
+  (* First deriv matrix *)
+  D\[Sigma]=N[Table[d\[Sigma][i, j], {i, 0, Ndiv}, {j, 0, Ndiv}], Prec];
+  (* Second deriv matrix *)
+  D2\[Sigma] = D\[Sigma] . D\[Sigma];
+
+  (* Full opertors in wave eq *)
+  L1 = L1b D\[Sigma] + L1a Id;
+  L2 = L2c D2\[Sigma] + L2b D\[Sigma] + L2a Id;
+
+  M = ArrayFlatten[{{Z, Id}, {L2, L1}}];
+
+  (* Solve for eigenvalues *)
+  Eigens = Eigenvalues[M] ;
+
+  sPattern = Which[s==0,x_/;(Im[x]==0. ), 
+    Abs[s]==1, x_/;(Im[x]==0. ) ,
+    Abs[s]==2,  x_/;(Im[x]==0. && Abs[Re[x]+4] >0.2 )]; 
+
+  (* Remove all values with Im[\[Omega]] = 0, which actually correspond to the purely imaginary roots (see multiplication by I/4 below).
+     Also remove those with Im[\[Omega]] > 0, as these are the corresponding QNMs in the 3rd quadrant. *)
+  Filtered = Reverse[DeleteCases[Eigens,x_/;(Im[x]>=0. )]];
+
+  (*Pick out eigenvalue corresponding to the desired overtone *)
+  (*Would be nice to save this and use the other elements for initial seeds for other values of n *)
+  (*However, the accuracy decreases as one goes down the list *)
+  Which[Abs[s]==2 && l==2 && n>8, I/4 Filtered[[n]], Abs[s]==2 && l==2 && n==8, (0.4615178773933189 10^-15 - I 3.9999999999996)/2, True, I/4 Filtered[[n+1]]]
+];
 (* ::Subsection::Closed:: *)
 (*QNMFrequency*)
 
@@ -387,6 +451,13 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
         Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       ];
       \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a, opts];,
+    "Ansorg-Macedo",
+      If[a!=0,
+        Message[QNMFrequency::nokerr, "Ansorg-Macedo", a];
+        \[Omega] = $Failed;
+        ,
+        \[Omega] = SpectralInitialGuess[s, l, n];
+      ];,
     "Large-l Asymptotic",
       If[a == 0,
         \[Omega] = Schwarzfinit1[s, l, n];,
@@ -394,7 +465,7 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
       ];,
     "Large-n Asymptotic",
       If[a!=0,
-        Message[QNMFrequency::nokerr, a];
+        Message[QNMFrequency::nokerr, "Large-n Asymptotic", a];
         \[Omega] = $Failed;
         ,
         \[Omega] = Schwarzfinit2[n];
