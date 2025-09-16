@@ -547,9 +547,9 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
         Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       ];
       \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a, opts];,
-    "Ansorg-Macedo",
+    "Spectral1D",
       If[a!=0,
-        Message[QNMFrequency::nokerr, "Ansorg-Macedo", a];
+        Message[QNMFrequency::nokerr, "Spectral1D", a];
         \[Omega] = $Failed;
         ,
         \[Omega] = SpectralInitialGuess[s, l, n];
