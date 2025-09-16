@@ -53,6 +53,7 @@ QNMFrequency::cmplx = "Only real values of a are allowed, but a=`1` specified.";
 QNMFrequency::nokerr = "Method \"`1`\" only supported for Schwarzschild spacetime, but a=`2` specified.";
 QNMFrequency::acc = "Accuracy of the calculated quasinormal mode frequency `1` is lower than that of the initial guess `2`.";
 QNMFrequency::noacc = "Failed estimating accuracy of the calculated quasinormal mode frequency `1` compared to the initial guess `2`.";
+QNMFrequency::allln = "Method `1` can only be used with l=All and n=All to compute a set of frequencies but l=`2` and n=`3` specified.";
 QNMRadial::optx = "Unknown options in `1`.";
 QNMRadial::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMRadial::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal\", but got `1`.";
@@ -104,6 +105,58 @@ rm[a_, M_] := M-Sqrt[M^2-a^2];
   B = (a^2-16M^2)\[Omega]^2+2(m a +2 I s M)\[Omega]+2(4(a^2-4M^2)M \[Omega]^2+(4 m a M-4I (s+2) M^2+I a^2)\[Omega]+ I m a+(s+1)M)\[Rho]+2(8 M^2 \[Omega]^2+6 I M \[Omega]-1)a^2 \[Rho]^2;
   -\[Rho]^2 \[CapitalDelta] d2R + A dR + (B+(\[Lambda] + 2 a m \[Omega] - (a \[Omega])^2)) R
 ]
+
+
+(* ::Subsection::Closed:: *)
+(*Discretised 2D Teukolsky operator on a hyperboloidal slice*)
+
+
+\[ScriptCapitalM]2D[s_, m_, a_, nx_, nz_] :=
+ Module[{\[Chi], z0, z1, \[CapitalDelta]z, z, x, Id, Zero, Dx, D2x, D\[Sigma], D2\[Sigma], L1\[Sigma]\[Sigma], L1\[Sigma], L10, L1xx, L1x, L2\[Sigma], L20, W, L1, L2,
+         rh, \[Kappa], \[Stigma], \[Lambda], \[Delta]1, \[Delta]2, \[Sigma], X},
+  (* Constants *)
+  rh = rp[a, M];
+  \[Kappa] = a/rh;
+  \[Stigma] = s;
+  \[Lambda] = M;
+  \[Delta]1 = Abs[m-s];
+  \[Delta]2 = Abs[m+s];
+
+  (* Radial and angular coordinates *)
+  z0 = 0;
+  z1 = 1;
+  \[CapitalDelta]z = z1-z0;
+  \[Chi] = N@Reverse[Cos[\[Pi] Subdivide[nz-1]]];
+  z = z0+1/2 \[CapitalDelta]z*(1+\[Chi]);
+  x = N@Reverse[Cos[\[Pi] Subdivide[nx-1]]];
+
+  (* Discretised operators *)
+  Id = IdentityMatrix[nx*nz];
+  Zero = ConstantArray[0, {nx*nz, nx*nz}];
+  Dx  = NDSolve`FiniteDifferenceDerivative[Derivative[0,1], {z, x}, DifferenceOrder -> {"Pseudospectral", "Pseudospectral"}, PeriodicInterpolation -> {False, False}]["DifferentiationMatrix"];
+  D2x = NDSolve`FiniteDifferenceDerivative[Derivative[0,2], {z, x}, DifferenceOrder -> {"Pseudospectral", "Pseudospectral"}, PeriodicInterpolation -> {False, False}]["DifferentiationMatrix"];
+  D\[Sigma]  = NDSolve`FiniteDifferenceDerivative[Derivative[1,0], {z, x}, DifferenceOrder -> {"Pseudospectral", "Pseudospectral"}, PeriodicInterpolation -> {False, False}]["DifferentiationMatrix"];
+  D2\[Sigma] = NDSolve`FiniteDifferenceDerivative[Derivative[2,0], {z, x}, DifferenceOrder -> {"Pseudospectral", "Pseudospectral"}, PeriodicInterpolation -> {False, False}]["DifferentiationMatrix"];
+
+  (* Coordinates on the full (flattened) 2D grid *)
+  {\[Sigma], X} = {Flatten[Outer[#1&, z, x]], Flatten[Outer[#2&, z, x]]};
+
+  L1xx = 1-X^2;
+  L1x = \[Delta]1-\[Delta]2-X (2+\[Delta]1+\[Delta]2);
+  
+  L1\[Sigma]\[Sigma] = (-1+\[Sigma]) \[Sigma]^2 (-1+\[Kappa]^2 \[Sigma]);
+  L1\[Sigma] = \[Sigma] (4 \[Kappa]^2 \[Sigma]^2+2 (1+\[Stigma])-\[Sigma] (2 I m \[Kappa]+(1+\[Kappa]^2) (3+\[Stigma])));
+  L10 = 1/2 (-m^2-\[Delta]2-\[Delta]1 (1+\[Delta]2)-4 I m \[Kappa] \[Sigma]+4 \[Kappa]^2 \[Sigma]^2-2 (1+\[Kappa]^2) \[Sigma] (1+\[Stigma])+\[Stigma] (2+\[Stigma]));
+  
+  L2\[Sigma] = (2 rh (1+\[Sigma]^2 (-2+2 \[Kappa]^4 (-1+\[Sigma])+\[Kappa]^2 (-3+2 \[Sigma]))))/\[Lambda];
+  L20 = (2 rh (3 (\[Kappa]^2+\[Kappa]^4) \[Sigma]^2-I m (\[Kappa]+2 \[Kappa] (1+\[Kappa]^2) \[Sigma])+\[Stigma]+\[Kappa] (-I X+\[Kappa]) \[Stigma]-\[Sigma] (2+\[Stigma]+\[Kappa]^4 (2+\[Stigma])+\[Kappa]^2 (3+2 \[Stigma]))))/\[Lambda];
+  
+  W = (rh^2 (4 (1+\[Sigma])+\[Kappa]^2 (7+X^2+4 \[Kappa]^2+4 (2+2 \[Kappa]^2+\[Kappa]^4) \[Sigma]-4 (1+\[Kappa]^2)^2 \[Sigma]^2)))/\[Lambda]^2;
+  
+  L1 = L1\[Sigma]\[Sigma] D2\[Sigma] + L1\[Sigma] D\[Sigma] + L10 Id + L1xx D2x + L1x Dx;
+  L2 = L2\[Sigma] D\[Sigma] + L20 Id;
+  ArrayFlatten[{{Zero, Id}, {L1/W, L2/W}}]
+];
 
 
 (* ::Subsection::Closed:: *)
@@ -422,6 +475,28 @@ SpectralInitialGuess[s_, l_, n_] :=
   (*However, the accuracy decreases as one goes down the list *)
   Which[Abs[s]==2 && l==2 && n>8, I/4 Filtered[[n]], Abs[s]==2 && l==2 && n==8, (0.4615178773933189 10^-15 - I 3.9999999999996)/2, True, I/4 Filtered[[n+1]]]
 ];
+
+
+(* ::Subsection::Closed:: *)
+(*Assaad-Macedo hyperboloidal method in Kerr*)
+
+
+(* ::Text:: *)
+(*Spectral method using hyperboloidal slicing in Kerr. This technique was adapted from a version kindly provided by Rodrigo Macedo. The technique is outlined in detail in Assaad and Macedo, arXiv:2506.04326.*)
+
+
+Options[SpectralInitialGuessKerr] = {"NumAngularPoints" -> 10, "NumRadialPoints" -> 10};
+
+
+SpectralInitialGuessKerr[s_, m_, a_, opts:OptionsPattern[]] :=
+ Module[{nAng, nRad},
+  nAng = OptionValue["NumAngularPoints"];
+  nRad = OptionValue["NumRadialPoints"];
+  
+  ReverseSortBy[I Eigenvalues[\[ScriptCapitalM]2D[s, m, a, nAng, nRad]], Im]
+];
+
+
 (* ::Subsection::Closed:: *)
 (*QNMFrequency*)
 
@@ -479,6 +554,22 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
         ,
         \[Omega] = SpectralInitialGuess[s, l, n];
       ];,
+    "Spectral2D",
+      If[l =!= All || n =!= All,
+        Message[QNMFrequency::allln, "Spectral2D", l, n];
+        \[Omega] = $Failed;,
+        \[Omega] = SpectralInitialGuessKerr[s, m, a];
+      ];,
+    {"Spectral2D", Rule[_,_]...},
+      opts = FilterRules[Rest[OptionValue[Method]], Options[SpectralInitialGuessKerr]];
+      If[opts =!= Rest[OptionValue[Method]],
+        Message[QNMFrequency::optx, Method -> OptionValue[Method]];
+      ];
+      If[l!= All || n!= All,
+        Message[QNMFrequency::allln, "Spectral2D", l, n];
+        \[Omega] = $Failed;,
+  	  \[Omega] = SpectralInitialGuessKerr[s, m, a, opts];
+  	];,
     "Large-l Asymptotic",
       If[a == 0,
         \[Omega] = Schwarzfinit1[s, l, n];,
