@@ -539,9 +539,9 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
         Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       ];
       \[Omega] = QNMFrequencyInIncidenceAmplitude[s, l, m, n, a, opts];,
-    Automatic | "Hyperboloidal",
+    Automatic | "SpheroidalEigenvalue",
       \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a];,
-    {"Hyperboloidal", Rule[_,_]...},
+    {"SpheroidalEigenvalue", Rule[_,_]...},
 	  opts = FilterRules[Rest[OptionValue[Method]], Options[QNMFrequencyHyperboloidal]];
       If[opts =!= Rest[OptionValue[Method]],
         Message[QNMFrequency::optx, Method -> OptionValue[Method]];
