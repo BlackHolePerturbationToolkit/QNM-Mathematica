@@ -268,11 +268,13 @@ ClearAll[QNMFrequencyInterpolation];
 
 Options[QNMFrequencyInterpolation] = Options[Interpolation];
 
-QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] := QNMFrequencyInterpolation[s, l, m, n] =
+QNMData[file_, dataset_] := QNMData[file, dataset] = Quiet[Import[file, {"Datasets", dataset}, "ComplexKeys"->{"r", "i"}];, {Import::general, Import::noelem, Import::nffil}];
+
+QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] :=
  Module[{h5file, dataset, data, ret},
   h5file = FileNameJoin[{$QNMDataDirectory, "QNM_s"<>ToString[s]<>".h5"}];
   dataset = "/l"<>ToString[l]<>"/m"<>ToString[m]<>"/n"<>ToString[n];
-  Quiet[data = Import[h5file, {"Datasets", dataset}, "ComplexKeys"->{"r", "i"}];, {Import::general, Import::noelem, Import::nffil}];
+  data = QNMData[h5file, dataset];
   If[MatchQ[data, <|"a"->_, "omega"->_|>],
     ret = Interpolation[Transpose[Lookup[data, {"a","omega"}]], opts];,
     Message[QNMFrequency::nointerp, s, l, m, n];
