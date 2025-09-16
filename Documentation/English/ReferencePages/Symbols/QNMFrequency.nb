@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     50386,       1269]
-NotebookOptionsPosition[     39243,       1047]
-NotebookOutlinePosition[     40014,       1073]
-CellTagsIndexPosition[     39934,       1068]
+NotebookDataLength[     70002,       1715]
+NotebookOptionsPosition[     55725,       1435]
+NotebookOutlinePosition[     56497,       1461]
+CellTagsIndexPosition[     56417,       1456]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -223,16 +223,19 @@ Cell[BoxData[GridBox[{
      BaseStyle->"Link"], 
     ButtonBox["Automatic",
      BaseStyle->"Link"], Cell["\<\
-Method to use. Possible choices include: \"Hypeboloidal\",  \
-\"Interpolation\", and \"IncidenceAmplitude\".\
+Method to use. Possible choices include: \"SpheroidalEigenvalue\",  \
+\"Interpolation\",  \"IncidenceAmplitude\", \"Spectral1D\", \"Spectral2D\", \
+\"Large-l Asymptotic\" and \"Large-n Asymptotic\".\
 \>", "TableText",ExpressionUUID->"a0f89267-2261-4fee-96e2-f35f51bc8742"]}
   }]], "3ColumnTableMod",
- CellChangeTimes->{{3.966779129521284*^9, 3.966779129521298*^9}},
+ CellChangeTimes->{{3.966779129521284*^9, 3.966779129521298*^9}, {
+  3.967004081434564*^9, 3.967004087384214*^9}, {3.9670044464583406`*^9, 
+  3.967004472759038*^9}},
  CellID->1287972564,ExpressionUUID->"e52beed7-5cdf-409e-b0e8-1929543e6d91"],
 
 Cell[TextData[{
- "Frequencies computed using the \"Hyperboloidal\" method use the algorithm \
-described in ",
+ "Frequencies computed using the \"SpheroidalEigenvalue\" method use the \
+algorithm described in ",
  ButtonBox["\"Computing the quasinormal modes and eigenfunctions for the \
 Teukolsky equation using horizon penetrating, hyperboloidally compactified \
 coordinates\", Justin L. Ripley, Class. Quantum Grav. 39 145009 (2022)",
@@ -243,8 +246,9 @@ coordinates\", Justin L. Ripley, Class. Quantum Grav. 39 145009 (2022)",
 }], "Notes",
  CellChangeTimes->{{3.897526502172883*^9, 3.897526519121022*^9}, {
   3.966780357119798*^9, 3.9667803832668324`*^9}, {3.966780997238843*^9, 
-  3.9667810091734257`*^9}, {3.966781075915391*^9, 3.9667811082688727`*^9}, {
-  3.9667823488227367`*^9, 3.9667823907793818`*^9}},
+  3.9667810091734257`*^9}, {3.966781075915391*^9, 3.966781108268873*^9}, {
+  3.9667823488227377`*^9, 3.9667823907793818`*^9}, {3.9670041184256763`*^9, 
+  3.967004123725953*^9}},
  CellID->1046863662,ExpressionUUID->"8d4bd30b-638c-41f9-913d-7cdcc5e94919"],
 
 Cell[TextData[{
@@ -261,7 +265,7 @@ the \"in\" solution obtained using the ",
  CellID->1839589043,ExpressionUUID->"80501770-c3e7-42db-881e-7ff4eb18e414"],
 
 Cell[TextData[{
- "Frequencies compute using the \"Interpolation\" method are interpolated \
+ "Frequencies computed using the \"Interpolation\" method are interpolated \
 from tables of values included in ",
  ButtonBox["Leo Stein's qnm package",
   BaseStyle->"Hyperlink",
@@ -269,15 +273,141 @@ from tables of values included in ",
     URL["https://github.com/duetosymmetry/qnm"], None}],
  "."
 }], "Notes",
- CellChangeTimes->{{3.9667824853553047`*^9, 3.9667825926530046`*^9}},
+ CellChangeTimes->{{3.9667824853553047`*^9, 3.966782592653004*^9}, 
+   3.9670095626538057`*^9},
  CellID->854354429,ExpressionUUID->"81174722-88f5-49ba-b5f9-4d84c0084e6a"],
 
+Cell[TextData[{
+ "Frequencies computed using the \"Spectral1D\" method are computed by \
+discretising the radial Teukolsky operator on a hyperboloidal slice using a \
+Chebyshev spectral grid, and computing the eigenvalues of the discretised \
+operator. The algorithm is described in ",
+ ButtonBox["\"Spectral decomposition of black-hole perturbations on \
+hyperboloidal slices\", Marcus Ansorg and Rodrigo Panosso Macedo, Phys. Rev. \
+D 93 124016 (2016)",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["https://doi.org/10.1103/PhysRevD.93.124016"], None}],
+ ". This method is only supported for Schwarzschild spacetime, i.e. where ",
+ Cell[BoxData[
+  RowBox[{"a", "=", "0"}]], "InlineFormula",
+  FormatType->StandardForm,ExpressionUUID->
+  "ab048d71-4c61-4838-9426-e9d19dfa5fea"],
+ "."
+}], "Notes",
+ CellChangeTimes->{{3.9667824853553047`*^9, 3.966782592653004*^9}, {
+   3.967005313270409*^9, 3.967005424847187*^9}, {3.967005463147242*^9, 
+   3.967005574015801*^9}, {3.967005606840375*^9, 3.967005645807755*^9}, 
+   3.9670095613954887`*^9},
+ CellID->1942015594,ExpressionUUID->"8578c407-115a-4bf5-935a-ffc441c98bb3"],
+
+Cell[TextData[{
+ "Frequencies computed using the \"Spectral2D\" method are computed by \
+discretising the 2D radial-angular Teukolsky operator on a hyperboloidal \
+slice using a 2D Chebyshev spectral grid, and computing the eigenvalues of \
+the discretised operator. The algorithm is described in ",
+ ButtonBox["\"Quasinormal modes in Kerr spacetime as a 2D Eigenvalue \
+problem\", Jamil Assaad and Rodrigo Panosso Macedo, arXiv:2506.04326",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["https://arxiv.org/pdf/2506.04326"], None}],
+ ". This method does not compute individual mode frequencies, but instead \
+computes a set of ",
+ Cell[BoxData[
+  RowBox[{"(", 
+   RowBox[{"l", ",", "n"}], ")"}]], "InlineFormula",
+  FormatType->StandardForm,ExpressionUUID->
+  "94215b0d-9bbd-4fc8-9e31-e0b43e6e0bb0"],
+ " freuqencies and therefore requires ",
+ Cell[BoxData[
+  RowBox[{"l", "=", "All"}]], "InlineFormula",
+  FormatType->StandardForm,ExpressionUUID->
+  "a720650b-9f8b-4d9a-a983-9b3a760f5576"],
+ " and ",
+ Cell[BoxData[
+  RowBox[{"n", "=", "All"}]], "InlineFormula",
+  FormatType->StandardForm,ExpressionUUID->
+  "de434adb-6d81-4a58-a356-93e2607a849c"],
+ "."
+}], "Notes",
+ CellChangeTimes->{{3.9667824853553047`*^9, 3.966782592653004*^9}, {
+   3.967005313270409*^9, 3.967005424847187*^9}, {3.967005463147242*^9, 
+   3.967005574015801*^9}, {3.967005606840375*^9, 3.967005856846045*^9}, 
+   3.967009559994817*^9},
+ CellID->1174177645,ExpressionUUID->"b7fc93a5-1388-44e7-b2bc-93202891c145"],
+
+Cell[TextData[{
+ "Frequencies compute dusing the \"Large-l Asymptotic\" method uses an \
+asymptotic expansion that is valid for ",
+ Cell[BoxData[
+  RowBox[{"l", ">>", "n"}]], "InlineFormula",
+  FormatType->StandardForm,ExpressionUUID->
+  "065f1651-6c10-4877-9355-55af68c6a37e"],
+ " and ",
+ Cell[BoxData[
+  RowBox[{"l", ">>", "1"}]], "InlineFormula",
+  FormatType->StandardForm,ExpressionUUID->
+  "1b471cca-8ef3-41f1-8db5-54f4c69384fa"],
+ ". In the Schwarzschild case this expansion is taken from ",
+ ButtonBox["\"On an expansion method for black hole quasinormal modes and \
+Regge poles\", Sam R. Dolan and Adrian C. Ottewill, Classical and Quantum \
+Gravity, 26 225003 (2009)",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["https://doi.org/10.1088/0264-9381/26/22/225003"], None},
+  ButtonNote->"https://doi.org/10.1088/0264-9381/26/22/225003"],
+ "."
+}], "Notes",
+ CellChangeTimes->{{3.9667824853553047`*^9, 3.966782592653004*^9}, {
+   3.967005876190209*^9, 3.9670058816545877`*^9}, {3.967005941223575*^9, 
+   3.9670060527590723`*^9}, {3.967006085170349*^9, 3.967006140809362*^9}, {
+   3.9670062029547*^9, 3.967006203363781*^9}, 3.967009565272234*^9},
+ CellID->1644497401,ExpressionUUID->"d9d49d26-6b31-4283-9aed-2eb63f1c6fd8"],
+
+Cell[TextData[{
+ "Frequencies computed using the \"Large-n Asymptotic\" method uses an \
+asymptotic expansion that is valid for ",
+ Cell[BoxData[
+  RowBox[{"n", ">>", "l"}]], "InlineFormula",
+  FormatType->StandardForm,ExpressionUUID->
+  "948c2cb0-c555-4a3a-84a8-c77590cfbe86"],
+ " and ",
+ Cell[BoxData[
+  RowBox[{"n", ">>", "1"}]], "InlineFormula",
+  FormatType->StandardForm,ExpressionUUID->
+  "b361a46f-fcf8-4364-bba6-aa76675465f9"],
+ ". This expansion is taken from ",
+ ButtonBox["\"Self-force and Green function in Schwarzschild spacetime via \
+quasinormal modes and branch cut\", Marc Casals, Sam R. Dolan, Adrian C. \
+Ottewill, and Barry Wardell, Phys. Rev. D 88, 044022 (2013)",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["https://doi.org/10.1103/PhysRevD.88.044022"], None}],
+ ". This method is only supported for Schwarzschild spacetime, i.e. where ",
+ Cell[BoxData[
+  RowBox[{"a", "=", "0"}]], "InlineFormula",
+  FormatType->StandardForm,ExpressionUUID->
+  "e6abd518-c0c4-428b-9c11-8e19220a36b4"],
+ "."
+}], "Notes",
+ CellChangeTimes->{{3.9667824853553047`*^9, 3.966782592653004*^9}, {
+   3.967005876190209*^9, 3.9670058816545877`*^9}, {3.967005941223575*^9, 
+   3.9670060527590723`*^9}, {3.967006085170349*^9, 3.967006140809362*^9}, {
+   3.9670062029547*^9, 3.967006230705806*^9}, {3.967006268406743*^9, 
+   3.9670062911253767`*^9}, {3.967006326075531*^9, 3.9670063866243668`*^9}, 
+   3.967009566941902*^9},
+ CellID->538271907,ExpressionUUID->"54889083-fcf9-4f13-9557-001f061b42ca"],
+
 Cell["\<\
-If an initial guess is not specified explicitly, then the \"Hyperboloidal\" \
-and \"IncidenceAmplitude\" methods use the output of the \"Interpolation\" \
-method as an initial guess.\
+If an initial guess is not specified explicitly, then the \
+\"SpheroidalEigenvalue\" and \"IncidenceAmplitude\" methods use the output of \
+the \"Interpolation\" method as an initial guess. If interpolation data is \
+not available, then they fall back to using the \"Large-l Asymptotic\" or \
+\"Large-n Asymptotic\" methods.\
 \>", "Notes",
- CellChangeTimes->{{3.966782596826791*^9, 3.966782644059823*^9}},
+ CellChangeTimes->{{3.966782596826791*^9, 3.966782644059823*^9}, {
+  3.967004131959114*^9, 3.967004163570623*^9}, {3.9670042646960382`*^9, 
+  3.967004268910697*^9}, {3.967004334498695*^9, 3.967004355023815*^9}},
  CellID->1795948249,ExpressionUUID->"85a1fb94-37a4-4b31-bc9e-e6fcb69623f0"],
 
 Cell[TextData[{
@@ -286,17 +416,20 @@ example ",
  Cell[BoxData[
   RowBox[{"Method", "\[Rule]", 
    RowBox[{"{", 
-    RowBox[{"\"\<Hyperboloidal\>\"", ",", " ", 
+    RowBox[{"\"\<SpheroidalEigenvalue\>\"", ",", " ", 
      RowBox[{"\"\<NumPoints\>\"", "\[Rule]", "30"}]}], "}"}]}]], 
   "InlineFormula",ExpressionUUID->"ad789a62-b302-49de-acf4-ef406562cb68"],
- " sets the \"NumPoints\" suboption for the \"Hyperboloidal\" method to 30."
+ " sets the \"NumPoints\" suboption for the \"SpheroidalEigenvalue\" method \
+to 30."
 }], "Notes",
  CellChangeTimes->{{3.966780407910036*^9, 3.9667804865715714`*^9}, {
-   3.96678118742167*^9, 3.9667811898486977`*^9}, 3.9667826687616167`*^9},
+   3.96678118742167*^9, 3.9667811898486977`*^9}, 3.9667826687616177`*^9, {
+   3.967004365603868*^9, 3.967004367264985*^9}},
  CellID->729522314,ExpressionUUID->"2a97cccc-e5ae-46ae-a4d7-6b0a142df8c9"],
 
 Cell[TextData[{
- "The possible suboptions that the \"Hyperboloidal\" method accepts are: ",
+ "The possible suboptions that the \"SpheroidalEigenvalue\" method accepts \
+are: ",
  Cell[BoxData[
   RowBox[{"\"\<NumPoints\>\"", " ", "->", " ", "n"}]], "InlineFormula",
   ExpressionUUID->"86deb20f-5e57-4b29-ba23-47a7b0735f8e"],
@@ -316,13 +449,13 @@ Cell[TextData[{
  "\[Omega]"], "InlineFormula",ExpressionUUID->
   "1bc4d2c4-db2d-4e97-b038-a3103f29eae7"],
  "  is the initial guess to use in the algorithm and ",
- Cell[BoxData["check"], "InlineFormula",
-  FormatType->StandardForm,ExpressionUUID->
+ Cell[BoxData[
+ "check"], "InlineFormula",ExpressionUUID->
   "57ff07d6-1352-4394-9e86-fc02f92fd14c"],
  "  can be either True (the default) or False (for faster performance)."
 }], "Notes",
  CellChangeTimes->{{3.966780471652137*^9, 3.966780629888081*^9}, {
-  3.9667831006465693`*^9, 3.966783226859398*^9}},
+   3.9667831006465693`*^9, 3.966783226859398*^9}, 3.967004368739501*^9},
  CellID->1569230924,ExpressionUUID->"52fe42c0-77c7-4d73-8125-488a59455d62"],
 
 Cell[TextData[{
@@ -353,6 +486,30 @@ Cell[TextData[{
   3.9667831006465693`*^9, 3.966783226859398*^9}, {3.9667832862809*^9, 
   3.966783321167912*^9}},
  CellID->1123008647,ExpressionUUID->"a1bd859b-6afb-4cbb-ac05-67e46908fef6"],
+
+Cell[TextData[{
+ "The possible suboptions that the \"Spectral2D\" method accepts are: ",
+ Cell[BoxData[
+  RowBox[{"\"\<NumAngularPoints\>\"", " ", "->", " ", "nAng"}]], 
+  "InlineFormula",ExpressionUUID->"47b14184-d2b6-4264-8d2e-1418ccac814c"],
+ " and ",
+ Cell[BoxData[
+  RowBox[{"\"\<NumRadialPoints\>\"", " ", "->", " ", "nRad"}]], 
+  "InlineFormula",ExpressionUUID->"3ad13c93-21d1-4a8f-8eee-b2e364185c9c"],
+ "  . Here, ",
+ Cell[BoxData[
+ "nAng"], "InlineFormula",ExpressionUUID->
+  "93765f7c-a1eb-47e4-9898-276052d737f6"],
+ " and  ",
+ Cell[BoxData[
+ "nRad"], "InlineFormula",ExpressionUUID->
+  "c41087ee-aa4d-4ad5-8b8d-c6844d6e6095"],
+ " specifies that the spectral grid should have that many nodes."
+}], "Notes",
+ CellChangeTimes->{{3.966780471652137*^9, 3.966780629888081*^9}, {
+   3.9667831006465693`*^9, 3.966783226859398*^9}, 3.967004368739501*^9, {
+   3.967009673195827*^9, 3.967009742044097*^9}},
+ CellID->870801568,ExpressionUUID->"e4de3d90-40a3-4716-b546-d205f91f4550"],
 
 Cell["\<\
 The \"IncidenceAmplitude\" method is the slowest, but can produce the most \
@@ -401,10 +558,10 @@ Cell[TextData[{
     "b59d4900-f95a-4852-a1ca-fbbf905f422b"], 
    DynamicModuleBox[{$CellContext`nbobj$$ = NotebookObject[
     "2dfad719-6d0c-4967-8efa-cd77b9f71a72", 
-     "611379ef-b723-4442-b460-0e83036df372"], $CellContext`cellobj$$ = 
+     "b14da469-cbe7-4c3f-ac9b-c4b4d201c88c"], $CellContext`cellobj$$ = 
     CellObject[
     "6566b351-8490-4463-b2a8-1ebc5f00a04c", 
-     "f62ed8a3-169a-4c6a-804f-e14ab9d39041"]}, 
+     "d9a2297f-a922-4af8-aa38-e8cf9b651112"]}, 
     TemplateBox[{
       GraphicsBox[{{
          Thickness[0.06], 
@@ -564,7 +721,7 @@ Cell[BoxData[
   RowBox[{
    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0.3"}], 
   "]"}]], "Input",
- CellChangeTimes->{{3.9667816396155233`*^9, 3.9667816531923947`*^9}, {
+ CellChangeTimes->{{3.9667816396155233`*^9, 3.966781653192395*^9}, {
   3.966783413061564*^9, 3.96678341815245*^9}, {3.966786167352742*^9, 
   3.966786170757292*^9}},
  CellLabel->"In[3]:=",
@@ -579,7 +736,7 @@ Cell[BoxData[
   RowBox[{
    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0.3`64", ",", 
    RowBox[{"Method", "->", "\"\<IncidenceAmplitude\>\""}]}], "]"}]], "Input",
- CellChangeTimes->{{3.9667816396155233`*^9, 3.9667816531923947`*^9}, {
+ CellChangeTimes->{{3.9667816396155233`*^9, 3.966781653192395*^9}, {
   3.966783413061564*^9, 3.96678341815245*^9}, {3.9667838767048063`*^9, 
   3.966783879412984*^9}, {3.966784777911208*^9, 3.96678478799163*^9}, {
   3.966785272050575*^9, 3.966785283467443*^9}},
@@ -637,10 +794,12 @@ Cell[BoxData[
  CellID->846406291,ExpressionUUID->"2b1a5e03-02db-487c-a734-69838fbdd378"],
 
 Cell["\<\
-Compute a quasinormal mode frequency using the three different supported \
-methods:\
+Compute a dominant Kerr quasinormal mode frequency using a variety of \
+different supported methods:\
 \>", "ExampleText",
- CellChangeTimes->{{3.966783846916318*^9, 3.96678388623337*^9}},
+ CellChangeTimes->{{3.966783846916318*^9, 3.96678388623337*^9}, {
+  3.967009865233561*^9, 3.967009865794991*^9}, {3.96700989751053*^9, 
+  3.967009897961788*^9}, {3.967010180693318*^9, 3.967010225005752*^9}},
  CellID->973146177,ExpressionUUID->"cf3de254-412d-49c6-a201-c79dddbff69a"],
 
 Cell[BoxData[
@@ -665,13 +824,134 @@ Cell[BoxData[
  RowBox[{"QNMFrequency", "[", 
   RowBox[{
    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0.3", ",", 
-   RowBox[{"Method", "->", "\"\<Hyperboloidal\>\""}]}], "]"}]], "Input",
- CellChangeTimes->{{3.966783899989033*^9, 3.966783904570305*^9}},
- CellLabel->"In[7]:=",
+   RowBox[{"Method", "->", "\"\<SpheroidalEigenvalue\>\""}]}], "]"}]], "Input",\
+
+ CellChangeTimes->{{3.966783899989033*^9, 3.966783904570305*^9}, {
+  3.967009873347754*^9, 3.967009877565713*^9}},
+ CellLabel->"In[8]:=",
  CellID->419551150,ExpressionUUID->"0cd6c0fb-d068-440d-bce9-f6011a9b67be"],
 
+Cell[BoxData[
+ RowBox[{"QNMFrequency", "[", 
+  RowBox[{
+   RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0.3", ",", 
+   RowBox[{"Method", "->", "\"\<Large-l Asymptotic\>\""}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.966783899989033*^9, 3.966783904570305*^9}, {
+  3.967009873347754*^9, 3.967009907770811*^9}},
+ CellLabel->"In[9]:=",
+ CellID->1919446231,ExpressionUUID->"9f50a741-bc57-495f-8257-dd5700eed5a4"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"QNMFrequency", "[", 
+   RowBox[{
+    RowBox[{"-", "2"}], ",", "All", ",", "2", ",", "All", ",", "0.3", ",", 
+    RowBox[{"Method", "->", "\"\<Spectral2D\>\""}]}], "]"}], "[", 
+  RowBox[{"[", "1", "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.966783899989033*^9, 3.966783904570305*^9}, {
+  3.967009873347754*^9, 3.9670100204717484`*^9}, {3.967010096763587*^9, 
+  3.967010104744033*^9}, {3.96701014657178*^9, 3.967010178125216*^9}},
+ CellLabel->"In[19]:=",
+ CellID->1921739669,ExpressionUUID->"d54e1a19-6fed-4a60-9588-eff668745bb4"],
+
+Cell["Additional methods are supported in the Schwarzschild case:", \
+"ExampleText",
+ CellChangeTimes->{{3.967010211218342*^9, 3.9670102277576036`*^9}},
+ CellID->1597547391,ExpressionUUID->"0e3ef91c-fda4-42ad-8649-c1753cadae31"],
+
+Cell[BoxData[
+ RowBox[{"QNMFrequency", "[", 
+  RowBox[{
+   RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0", ",", 
+   RowBox[{"Method", "->", "\"\<Interpolation\>\""}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.96678389517162*^9, 3.966783898302678*^9}, 
+   3.967010264712574*^9},
+ CellLabel->"In[20]:=",
+ CellID->1639100241,ExpressionUUID->"9bd0376f-2777-40f3-b34f-9200b63af97d"],
+
+Cell[BoxData[
+ RowBox[{"QNMFrequency", "[", 
+  RowBox[{
+   RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0", ",", 
+   RowBox[{"Method", "->", "\"\<IncidenceAmplitude\>\""}]}], "]"}]], "Input",
+ CellChangeTimes->{3.966783899989033*^9, 3.96701026995317*^9},
+ CellLabel->"In[21]:=",
+ CellID->528432869,ExpressionUUID->"479accab-bd86-4336-9d50-9cb982ab6873"],
+
+Cell[BoxData[
+ RowBox[{"QNMFrequency", "[", 
+  RowBox[{
+   RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0", ",", 
+   RowBox[{"Method", "->", "\"\<SpheroidalEigenvalue\>\""}]}], "]"}]], "Input",\
+
+ CellChangeTimes->{{3.966783899989033*^9, 3.966783904570305*^9}, {
+   3.967009873347754*^9, 3.967009877565713*^9}, 3.967010275068529*^9},
+ CellLabel->"In[22]:=",
+ CellID->1654437551,ExpressionUUID->"bc335bf1-fc73-4f97-a09f-dfa2fb741837"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"QNMFrequency", "[", 
+   RowBox[{
+    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0", ",", 
+    RowBox[{"Method", "->", "\"\<Large-l Asymptotic\>\""}]}], "]"}], "//", 
+  "N"}]], "Input",
+ CellChangeTimes->{{3.966783899989033*^9, 3.966783904570305*^9}, {
+  3.967009873347754*^9, 3.967009907770811*^9}, {3.967010286922296*^9, 
+  3.967010295567101*^9}},
+ CellLabel->"In[24]:=",
+ CellID->170803967,ExpressionUUID->"b32af151-c374-453e-87c9-fc41a003c3fc"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"QNMFrequency", "[", 
+   RowBox[{
+    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0", ",", 
+    RowBox[{"Method", "->", "\"\<Large-n Asymptotic\>\""}]}], "]"}], "//", 
+  "N"}]], "Input",
+ CellChangeTimes->{{3.966783899989033*^9, 3.966783904570305*^9}, {
+  3.967009873347754*^9, 3.967009907770811*^9}, {3.967010286922296*^9, 
+  3.9670103163900623`*^9}},
+ CellLabel->"In[26]:=",
+ CellID->1006882340,ExpressionUUID->"95bed166-de59-4e4d-b929-5e0b5bbae791"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"QNMFrequency", "[", 
+   RowBox[{
+    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0", ",", 
+    RowBox[{"Method", "->", "\"\<Spectral1D\>\""}]}], "]"}], "//", 
+  "N"}]], "Input",
+ CellChangeTimes->{{3.966783899989033*^9, 3.966783904570305*^9}, {
+  3.967009873347754*^9, 3.9670100204717484`*^9}, {3.967010096763587*^9, 
+  3.967010104744033*^9}, {3.96701014657178*^9, 3.967010178125216*^9}, {
+  3.967010309419561*^9, 3.967010336249414*^9}},
+ CellLabel->"In[28]:=",
+ CellID->555003689,ExpressionUUID->"01478318-344c-40d4-a06d-67f8af6cd950"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"QNMFrequency", "[", 
+   RowBox[{
+    RowBox[{"-", "2"}], ",", "All", ",", "2", ",", "All", ",", "0", ",", 
+    RowBox[{"Method", "->", "\"\<Spectral2D\>\""}]}], "]"}], "[", 
+  RowBox[{"[", "1", "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.966783899989033*^9, 3.966783904570305*^9}, {
+   3.967009873347754*^9, 3.9670100204717484`*^9}, {3.967010096763587*^9, 
+   3.967010104744033*^9}, {3.96701014657178*^9, 3.967010178125216*^9}, 
+   3.967010309419561*^9},
+ CellLabel->"In[25]:=",
+ CellID->54241911,ExpressionUUID->"ee5afb5b-bc57-45d6-ab5c-ccf79cb5ee09"],
+
+Cell[CellGroupData[{
+
+Cell["IncidenceAmplitude", "ExampleSubsubsection",
+ CellChangeTimes->{{3.967010828022167*^9, 3.967010831267589*^9}},
+ CellID->1629436634,ExpressionUUID->"20656162-896a-426a-91a6-8145ecd32b32"],
+
 Cell["Set sub-options for the \"IncidenceAmplitude\" method", "ExampleText",
- CellChangeTimes->{{3.966783912152864*^9, 3.966783946604975*^9}},
+ CellChangeTimes->{{3.966783912152864*^9, 3.966783946604975*^9}, {
+  3.966792137923799*^9, 3.966792138547659*^9}},
  CellID->1885063396,ExpressionUUID->"8611b41d-d287-408f-9c55-c7492f66a0c6"],
 
 Cell[BoxData[
@@ -686,11 +966,19 @@ Cell[BoxData[
         RowBox[{"0.08", "I"}]}]}]}], "}"}]}]}], "]"}]], "Input",
  CellChangeTimes->{{3.966783899989033*^9, 3.966783940816473*^9}, {
   3.9667853730554*^9, 3.966785380230867*^9}},
- CellLabel->"In[8]:=",
- CellID->1080107111,ExpressionUUID->"50ad9895-bb38-4115-88ee-7bd906acaa22"],
+ CellLabel->"In[30]:=",
+ CellID->1080107111,ExpressionUUID->"50ad9895-bb38-4115-88ee-7bd906acaa22"]
+}, Open  ]],
 
-Cell["Set sub-options for the \"Hyperboloidal\" method", "ExampleText",
- CellChangeTimes->{{3.966783912152864*^9, 3.966783953020988*^9}},
+Cell[CellGroupData[{
+
+Cell["SpheroidalEigenvalue", "ExampleSubsubsection",
+ CellChangeTimes->{{3.9670108626838408`*^9, 3.967010865619144*^9}},
+ CellID->931394840,ExpressionUUID->"6a139dc4-3d87-497c-bfe6-a3613fcea173"],
+
+Cell["Set sub-options for the \"SpheroidalEigenvalue\" method", "ExampleText",
+ CellChangeTimes->{{3.966783912152864*^9, 3.966783953020988*^9}, {
+  3.9670105618507433`*^9, 3.967010565556508*^9}},
  CellID->253860373,ExpressionUUID->"1a1b0465-811a-4b44-bbce-ea1ca30c16e9"],
 
 Cell[BoxData[
@@ -699,7 +987,7 @@ Cell[BoxData[
    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0.3", ",", 
    RowBox[{"Method", "->", 
     RowBox[{"{", 
-     RowBox[{"\"\<Hyperboloidal\>\"", ",", 
+     RowBox[{"\"\<SpheroidalEigenvalue\>\"", ",", 
       RowBox[{"\"\<NumPoints\>\"", "->", "32"}], ",", 
       RowBox[{"\"\<InitialGuess\>\"", "->", 
        RowBox[{"0.4", "-", 
@@ -707,9 +995,100 @@ Cell[BoxData[
       RowBox[{"\"\<AccuracyCheck\>\"", "->", "False"}]}], "}"}]}]}], 
   "]"}]], "Input",
  CellChangeTimes->{{3.966783899989033*^9, 3.966783994222888*^9}, 
-   3.966785442142173*^9},
- CellLabel->"In[9]:=",
+   3.966785442142173*^9, 3.967010592934866*^9},
+ CellLabel->"In[29]:=",
  CellID->1728766069,ExpressionUUID->"1c607349-bc12-4c5c-8ed8-f88e6c11c531"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Interpolation", "ExampleSubsubsection",
+ CellChangeTimes->{{3.9670108706298943`*^9, 3.967010872429599*^9}},
+ CellID->486469536,ExpressionUUID->"32ee9b0f-b0c7-424d-88f6-06390db7acb4"],
+
+Cell["Set sub-options for the \"Interpolation\" method", "ExampleText",
+ CellChangeTimes->{{3.966783912152864*^9, 3.966783953020988*^9}, {
+  3.9670105618507433`*^9, 3.967010565556508*^9}, {3.9670106188169394`*^9, 
+  3.967010620435363*^9}},
+ CellID->1540465574,ExpressionUUID->"7d450085-d91b-42cc-9a4c-da38c0befaf3"],
+
+Cell[BoxData[
+ RowBox[{"QNMFrequency", "[", 
+  RowBox[{
+   RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0.3", ",", 
+   RowBox[{"Method", "->", 
+    RowBox[{"{", 
+     RowBox[{"\"\<Interpolation\>\"", ",", 
+      RowBox[{"InterpolationOrder", "->", "0"}]}], "}"}]}]}], "]"}]], "Input",\
+
+ CellChangeTimes->{{3.966783899989033*^9, 3.966783994222888*^9}, 
+   3.966785442142173*^9, {3.967010592934866*^9, 3.967010641069675*^9}},
+ CellLabel->"In[32]:=",
+ CellID->542053986,ExpressionUUID->"6912bee0-3c6c-4267-a597-5e7864b9f90a"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Spectral2D", "ExampleSubsubsection",
+ CellChangeTimes->{{3.9670108788648787`*^9, 3.967010881219515*^9}},
+ CellID->717190074,ExpressionUUID->"9b781f58-de6e-4e4d-8538-20664b8bd5f0"],
+
+Cell["Set sub-options for the \"Spectral2D\" method", "ExampleText",
+ CellChangeTimes->{{3.966783912152864*^9, 3.966783953020988*^9}, {
+  3.9670105618507433`*^9, 3.967010565556508*^9}, {3.9670106188169394`*^9, 
+  3.967010620435363*^9}, {3.967010773865491*^9, 3.9670107758658867`*^9}},
+ CellID->1308965698,ExpressionUUID->"25899e2a-e097-44c3-ad63-5fd55fc5788e"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"QNMFrequency", "[", 
+   RowBox[{
+    RowBox[{"-", "2"}], ",", "All", ",", "2", ",", "All", ",", "0.3", ",", 
+    RowBox[{"Method", "->", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Spectral2D\>\"", ",", 
+       RowBox[{"\"\<NumAngularPoints\>\"", "->", "12"}], ",", 
+       RowBox[{"\"\<NumRadialPoints\>\"", "->", "12"}]}], "}"}]}]}], "]"}], 
+  "[", 
+  RowBox[{"[", "1", "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.9670106655757723`*^9, 3.9670107570252523`*^9}},
+ CellLabel->"In[41]:=",
+ CellID->1542861820,ExpressionUUID->"f4d44459-7bbf-4443-a5fc-2641ce3ec9d2"],
+
+Cell["\<\
+The \"Spectral2D\" method produces a whole set of quasinormal mode \
+frequencies corresponding to different l and n, and including \"mirror\" \
+modes with negative frequencies:\
+\>", "ExampleText",
+ CellChangeTimes->{{3.967010891862032*^9, 3.967010934759844*^9}, {
+  3.967010982815371*^9, 3.9670109955025063`*^9}},
+ CellID->24308097,ExpressionUUID->"008e7228-1613-4a47-a353-323491043485"],
+
+Cell[BoxData[
+ RowBox[{"ListPlot", "[", 
+  RowBox[{
+   RowBox[{"ReIm", "[", 
+    RowBox[{"Partition", "[", 
+     RowBox[{
+      RowBox[{"QNMFrequency", "[", 
+       RowBox[{
+        RowBox[{"-", "2"}], ",", "All", ",", "2", ",", "All", ",", "0.3", ",", 
+        RowBox[{"Method", "->", 
+         RowBox[{"{", 
+          RowBox[{"\"\<Spectral2D\>\"", ",", 
+           RowBox[{"\"\<NumAngularPoints\>\"", "->", "4"}], ",", 
+           RowBox[{"\"\<NumRadialPoints\>\"", "->", "4"}]}], "}"}]}]}], "]"}],
+       ",", "8"}], "]"}], "]"}], ",", 
+   RowBox[{"AxesLabel", "->", 
+    RowBox[{"{", 
+     RowBox[{"\"\<Re[\[Omega]]\>\"", ",", "\"\<Im[\[Omega]]\>\""}], "}"}]}]}],
+   "]"}]], "Input",
+ CellChangeTimes->{{3.9670106655757723`*^9, 3.9670107570252523`*^9}, {
+  3.9670109365035143`*^9, 3.967010977592092*^9}, {3.967011008512004*^9, 
+  3.967011013716107*^9}},
+ CellLabel->"In[45]:=",
+ CellID->161871616,ExpressionUUID->"cab7888b-f132-4384-9f5a-5e6c6878a311"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]],
 
@@ -754,7 +1133,7 @@ Cell[BoxData[
    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0.999"}], 
   "]"}]], "Input",
  CellChangeTimes->{{3.9667835095392714`*^9, 3.966783510087063*^9}},
- CellLabel->"In[10]:=",
+ CellLabel->"In[46]:=",
  CellID->134369076,ExpressionUUID->"bfded07f-ac51-47b6-942f-f23187ef0b2e"],
 
 Cell["\<\
@@ -770,16 +1149,17 @@ Cell[BoxData[
    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0.999", ",", 
    RowBox[{"Method", "->", "\"\<IncidenceAmplitude\>\""}]}], "]"}]], "Input",
  CellChangeTimes->{{3.966783513224115*^9, 3.96678352193198*^9}},
- CellLabel->"In[11]:=",
+ CellLabel->"In[47]:=",
  CellID->1313218717,ExpressionUUID->"a8afd9d3-ccdd-4c90-ae2a-d702bddc5023"],
 
 Cell["\<\
 It is also possible to obtain a more accurate answer using the \
-\"Hyperboloidal\" method provided a spectral grid with enough points is used:\
-\
+\"SpheroidalEigenvalue\" method provided a spectral grid with enough points \
+is used:\
 \>", "ExampleText",
- CellChangeTimes->{{3.9667835247197313`*^9, 3.9667835589416933`*^9}, {
-  3.966786420256665*^9, 3.966786421743389*^9}},
+ CellChangeTimes->{{3.9667835247197313`*^9, 3.966783558941695*^9}, {
+  3.966786420256665*^9, 3.966786421743389*^9}, {3.967011053556529*^9, 
+  3.9670110570066767`*^9}},
  CellID->458039947,ExpressionUUID->"32f89b57-1284-46ff-86d6-59fef4d1c7da"],
 
 Cell[BoxData[
@@ -788,13 +1168,14 @@ Cell[BoxData[
    RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "0.999", ",", 
    RowBox[{"Method", "->", 
     RowBox[{"{", 
-     RowBox[{"\"\<Hyperboloidal\>\"", ",", 
+     RowBox[{"\"\<SpheroidalEigenvalue\>\"", ",", 
       RowBox[{"\"\<NumPoints\>\"", "->", "45"}]}], "}"}]}]}], "]"}]], "Input",\
 
  CellChangeTimes->{{3.966783513224115*^9, 3.96678352193198*^9}, {
   3.966783559812344*^9, 3.96678357607508*^9}, {3.966785465811595*^9, 
-  3.9667854944831033`*^9}, {3.966786284633984*^9, 3.966786295164613*^9}},
- CellLabel->"In[12]:=",
+  3.966785494483103*^9}, {3.966786284633984*^9, 3.966786295164613*^9}, {
+  3.967011059200131*^9, 3.967011062026919*^9}},
+ CellLabel->"In[48]:=",
  CellID->1184172884,ExpressionUUID->"5f7d7630-7c1b-4e3e-97a3-0db1cb5ac8d9"],
 
 Cell[TextData[{
@@ -815,31 +1196,37 @@ Cell[BoxData[
    RowBox[{"Method", "->", "\"\<Interpolation\>\""}]}], "]"}]], "Input",
  CellChangeTimes->{{3.966783744096075*^9, 3.966783764276665*^9}, {
   3.966788556733097*^9, 3.966788592984025*^9}},
- CellLabel->"In[13]:=",
+ CellLabel->"In[49]:=",
  CellID->613350883,ExpressionUUID->"2f77fc27-010b-4378-b638-cbc66447170c"],
 
 Cell["\<\
-In those cases, methods that require an initial guess will fail unless one is \
-given explicitly:\
+In those cases, methods that require an initial guess will fall back to \
+asymptotic expansions. These may lead to picking out a different quasinormal \
+mode than expected:\
 \>", "ExampleText",
- CellChangeTimes->{3.966783679580169*^9, 3.966783810131729*^9},
+ CellChangeTimes->{
+  3.966783679580169*^9, 3.966783810131729*^9, {3.9670110739217577`*^9, 
+   3.967011167560858*^9}},
  CellID->1669632482,ExpressionUUID->"9a14b2e4-0bce-4680-8a8b-2602e8b97ed9"],
 
 Cell[BoxData[
  RowBox[{"QNMFrequency", "[", 
   RowBox[{
    RowBox[{"-", "2"}], ",", "8", ",", "8", ",", "0", ",", "0.999", ",", 
-   RowBox[{"Method", "->", "\"\<Hyperboloidal\>\""}]}], "]"}]], "Input",
+   RowBox[{"Method", "->", "\"\<SpheroidalEigenvalue\>\""}]}], "]"}]], "Input",\
+
  CellChangeTimes->{{3.966783744096075*^9, 3.966783807388425*^9}, {
-  3.9667886082173767`*^9, 3.966788611314712*^9}},
- CellLabel->"In[14]:=",
+  3.9667886082173786`*^9, 3.966788611314712*^9}, {3.967011129307826*^9, 
+  3.967011138072575*^9}},
+ CellLabel->"In[51]:=",
  CellID->863199019,ExpressionUUID->"4d6840c8-a555-4509-952e-460e1b48d734"],
 
 Cell["\<\
-It is still possible to compute the quasinormal mode if a good initial guess \
-is given:\
+It is still possible to compute a different quasinormal mode if a good \
+initial guess is given:\
 \>", "ExampleText",
- CellChangeTimes->{{3.9667836837054358`*^9, 3.966783708038985*^9}},
+ CellChangeTimes->{{3.9667836837054358`*^9, 3.966783708038985*^9}, {
+  3.9670112191475067`*^9, 3.967011221410347*^9}},
  CellID->1490922357,ExpressionUUID->"9c00a284-2430-4523-9ab8-c1e98c9c9d61"],
 
 Cell[BoxData[
@@ -848,21 +1235,22 @@ Cell[BoxData[
    RowBox[{"-", "2"}], ",", "8", ",", "8", ",", "0", ",", "0.999", ",", 
    RowBox[{"Method", "->", 
     RowBox[{"{", 
-     RowBox[{"\"\<Hyperboloidal\>\"", ",", 
+     RowBox[{"\"\<SpheroidalEigenvalue\>\"", ",", 
       RowBox[{"\"\<InitialGuess\>\"", "->", 
        RowBox[{"3.5", "-", 
         RowBox[{"0.01", "I"}]}]}]}], "}"}]}]}], "]"}]], "Input",
  CellChangeTimes->{{3.966783744096075*^9, 3.966783787253705*^9}, {
-  3.9667884693168163`*^9, 3.966788529922681*^9}, {3.966788614718598*^9, 
-  3.9667886574543953`*^9}},
- CellLabel->"In[15]:=",
+   3.9667884693168163`*^9, 3.966788529922681*^9}, {3.966788614718598*^9, 
+   3.966788657454396*^9}, 3.96701118113024*^9},
+ CellLabel->"In[52]:=",
  CellID->269453161,ExpressionUUID->"e815654d-217a-4848-af3f-2f4330f315fa"],
 
 Cell["\<\
-In this case there is no guarantee that the mode that is found is the one \
+Again, there is no guarantee that the mode that is found is the one \
 corresponding to the specified overtone number.\
 \>", "ExampleText",
- CellChangeTimes->{{3.966788687511672*^9, 3.9667887266325827`*^9}},
+ CellChangeTimes->{{3.966788687511672*^9, 3.966788726632583*^9}, {
+  3.967011212059626*^9, 3.967011228000204*^9}},
  CellID->485394707,ExpressionUUID->"1376c319-8aaa-407b-a5bd-b94c1a75dcce"]
 }, Open  ]],
 
@@ -905,7 +1293,7 @@ Cell[BoxData[
       RowBox[{"-", "2"}], ",", "2", ",", "2", ",", "0", ",", "a", ",", 
       RowBox[{"Method", "->", 
        RowBox[{"{", 
-        RowBox[{"\"\<Hyperboloidal\>\"", ",", 
+        RowBox[{"\"\<SpheroidalEigenvalue\>\"", ",", 
          RowBox[{"\"\<AccuracyCheck\>\"", "->", "False"}]}], "}"}]}]}], "]"}],
      "]"}], ",", 
    RowBox[{"{", 
@@ -917,9 +1305,9 @@ Cell[BoxData[
      RowBox[{"\"\<Re[\[Omega]]\>\"", ",", "\"\<Im[\[Omega]]\>\""}], "}"}]}]}],
    "]"}]], "Input",
  CellChangeTimes->{{3.966784051166281*^9, 3.966784056754128*^9}, {
-  3.966784105406607*^9, 3.966784119390565*^9}, {3.9667855449072127`*^9, 
-  3.966785615241044*^9}},
- CellLabel->"In[16]:=",
+  3.966784105406607*^9, 3.966784119390565*^9}, {3.966785544907213*^9, 
+  3.966785615241044*^9}, {3.967011278289757*^9, 3.967011281565282*^9}},
+ CellLabel->"In[54]:=",
  CellID->1275521683,ExpressionUUID->"a683004d-7346-4977-8f79-828da857602d"],
 
 Cell["Find the \"unconventional mode\" from arXiv:2506.14635:", "ExampleText",
@@ -952,10 +1340,10 @@ Cell[BoxData[
   3.963377127318161*^9, 3.963377142249756*^9}, {3.963377195164629*^9, 
   3.963377206854053*^9}, {3.963377299678384*^9, 3.963377302410346*^9}, {
   3.966786976361954*^9, 3.966787005563128*^9}, {3.96678707171938*^9, 
-  3.9667870720200443`*^9}, {3.96678748486625*^9, 3.966787494889875*^9}, {
+  3.966787072020045*^9}, {3.96678748486625*^9, 3.966787494889875*^9}, {
   3.966789812149044*^9, 3.9667898138783913`*^9}, {3.966790288573251*^9, 
   3.966790296281424*^9}},
- CellLabel->"In[17]:=",
+ CellLabel->"In[55]:=",
  CellID->2085612232,ExpressionUUID->"02972ef5-9614-466f-96f3-814e5c2c1b9d"]
 }, Open  ]]
 }, Open  ]],
@@ -1045,8 +1433,8 @@ Cell[BoxData[""], "Template",
 }, Closed]]
 }, Open  ]]
 },
-WindowSize->{700, 770},
-WindowMargins->{{445, Automatic}, {Automatic, 35}},
+WindowSize->{1054, 806},
+WindowMargins->{{187, Automatic}, {Automatic, 43}},
 TaggingRules-><|"Paclet" -> "QNM"|>,
 CellContext->"Global`",
 FrontEndVersion->"14.0 for Mac OS X x86 (64-bit) (December 12, 2023)",
@@ -1060,14 +1448,14 @@ ExpressionUUID->"2dfad719-6d0c-4967-8efa-cd77b9f71a72"
 (*CellTagsOutline
 CellTagsIndex->{
  "ExtendedExamples"->{
-  Cell[22467, 591, 488, 13, 58, "ExtendedExamplesSection",ExpressionUUID->"b49eb95e-d47f-4f4f-9ce8-ec74f038037e",
+  Cell[29432, 748, 488, 13, 58, "ExtendedExamplesSection",ExpressionUUID->"b49eb95e-d47f-4f4f-9ce8-ec74f038037e",
    CellTags->"ExtendedExamples",
    CellID->1107975768]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"ExtendedExamples", 39739, 1061}
+ {"ExtendedExamples", 56222, 1449}
  }
 *)
 (*NotebookFileOutline
@@ -1091,183 +1479,241 @@ Cell[7845, 200, 576, 13, 45, "Notes",ExpressionUUID->"b4569d23-dcd6-4488-bfea-1a
  CellID->1793794626],
 Cell[8424, 215, 129, 1, 27, "Notes",ExpressionUUID->"a771389c-6c67-4644-90fd-8891f8bcfe0f",
  CellID->2110378288],
-Cell[8556, 218, 576, 12, 61, "3ColumnTableMod",ExpressionUUID->"e52beed7-5cdf-409e-b0e8-1929543e6d91",
+Cell[8556, 218, 766, 15, 81, "3ColumnTableMod",ExpressionUUID->"e52beed7-5cdf-409e-b0e8-1929543e6d91",
  CellID->1287972564],
-Cell[9135, 232, 800, 15, 63, "Notes",ExpressionUUID->"8d4bd30b-638c-41f9-913d-7cdcc5e94919",
+Cell[9325, 235, 856, 16, 81, "Notes",ExpressionUUID->"8d4bd30b-638c-41f9-913d-7cdcc5e94919",
  CellID->1046863662],
-Cell[9938, 249, 496, 11, 45, "Notes",ExpressionUUID->"80501770-c3e7-42db-881e-7ff4eb18e414",
+Cell[10184, 253, 496, 11, 45, "Notes",ExpressionUUID->"80501770-c3e7-42db-881e-7ff4eb18e414",
  CellID->1839589043],
-Cell[10437, 262, 428, 10, 45, "Notes",ExpressionUUID->"81174722-88f5-49ba-b5f9-4d84c0084e6a",
+Cell[10683, 266, 455, 11, 45, "Notes",ExpressionUUID->"81174722-88f5-49ba-b5f9-4d84c0084e6a",
  CellID->854354429],
-Cell[10868, 274, 349, 6, 45, "Notes",ExpressionUUID->"85a1fb94-37a4-4b31-bc9e-e6fcb69623f0",
+Cell[11141, 279, 1120, 22, 99, "Notes",ExpressionUUID->"8578c407-115a-4bf5-935a-ffc441c98bb3",
+ CellID->1942015594],
+Cell[12264, 303, 1487, 33, 117, "Notes",ExpressionUUID->"b7fc93a5-1388-44e7-b2bc-93202891c145",
+ CellID->1174177645],
+Cell[13754, 338, 1233, 26, 81, "Notes",ExpressionUUID->"d9d49d26-6b31-4283-9aed-2eb63f1c6fd8",
+ CellID->1644497401],
+Cell[14990, 366, 1500, 32, 99, "Notes",ExpressionUUID->"54889083-fcf9-4f13-9557-001f061b42ca",
+ CellID->538271907],
+Cell[16493, 400, 637, 10, 63, "Notes",ExpressionUUID->"85a1fb94-37a4-4b31-bc9e-e6fcb69623f0",
  CellID->1795948249],
-Cell[11220, 282, 662, 13, 63, "Notes",ExpressionUUID->"2a97cccc-e5ae-46ae-a4d7-6b0a142df8c9",
+Cell[17133, 412, 728, 15, 63, "Notes",ExpressionUUID->"2a97cccc-e5ae-46ae-a4d7-6b0a142df8c9",
  CellID->729522314],
-Cell[11885, 297, 1301, 28, 81, "Notes",ExpressionUUID->"52fe42c0-77c7-4d73-8125-488a59455d62",
+Cell[17864, 429, 1307, 29, 81, "Notes",ExpressionUUID->"52fe42c0-77c7-4d73-8125-488a59455d62",
  CellID->1569230924],
-Cell[13189, 327, 438, 10, 45, "Notes",ExpressionUUID->"92456aa0-6495-4d1a-b00f-665ebf65f3e0",
+Cell[19174, 460, 438, 10, 45, "Notes",ExpressionUUID->"92456aa0-6495-4d1a-b00f-665ebf65f3e0",
  CellID->433165670],
-Cell[13630, 339, 677, 15, 45, "Notes",ExpressionUUID->"a1bd859b-6afb-4cbb-ac05-67e46908fef6",
+Cell[19615, 472, 677, 15, 45, "Notes",ExpressionUUID->"a1bd859b-6afb-4cbb-ac05-67e46908fef6",
  CellID->1123008647],
-Cell[14310, 356, 261, 5, 27, "Notes",ExpressionUUID->"343f8b72-473f-4128-bc7b-7db9eac85be0",
+Cell[20295, 489, 981, 22, 63, "Notes",ExpressionUUID->"e4de3d90-40a3-4716-b546-d205f91f4550",
+ CellID->870801568],
+Cell[21279, 513, 261, 5, 27, "Notes",ExpressionUUID->"343f8b72-473f-4128-bc7b-7db9eac85be0",
  CellID->1965912205]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[14608, 366, 458, 13, 40, "SeeAlsoSection",ExpressionUUID->"64786287-4d40-4e53-847e-0a8482de3c39",
+Cell[21577, 523, 458, 13, 40, "SeeAlsoSection",ExpressionUUID->"64786287-4d40-4e53-847e-0a8482de3c39",
  CellID->319721388],
-Cell[15069, 381, 2107, 51, 23, "SeeAlso",ExpressionUUID->"374388fe-a194-48bc-86b3-dd3b82bebc95",
+Cell[22038, 538, 2107, 51, 23, "SeeAlso",ExpressionUUID->"374388fe-a194-48bc-86b3-dd3b82bebc95",
  CellID->553283322]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[17213, 437, 435, 12, 41, "TechNotesSection",ExpressionUUID->"2b034ea8-d43c-47f6-bc41-960777f32b2c",
+Cell[24182, 594, 435, 12, 41, "TechNotesSection",ExpressionUUID->"2b034ea8-d43c-47f6-bc41-960777f32b2c",
  CellID->428601344],
-Cell[17651, 451, 100, 1, 19, "Tutorials",ExpressionUUID->"e1e38379-3974-4f92-b600-f41c45de46ad",
+Cell[24620, 608, 100, 1, 19, "Tutorials",ExpressionUUID->"e1e38379-3974-4f92-b600-f41c45de46ad",
  CellID->842636570]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[17788, 457, 118, 1, 40, "MoreAboutSection",ExpressionUUID->"282a277d-5dcf-4a99-9b59-7f2b2be234a5",
+Cell[24757, 614, 118, 1, 40, "MoreAboutSection",ExpressionUUID->"282a277d-5dcf-4a99-9b59-7f2b2be234a5",
  CellID->1685663672],
-Cell[17909, 460, 244, 4, 19, "MoreAbout",ExpressionUUID->"f0e87cca-dd46-440a-9dd2-36f6831cb4c8",
+Cell[24878, 617, 244, 4, 19, "MoreAbout",ExpressionUUID->"f0e87cca-dd46-440a-9dd2-36f6831cb4c8",
  CellID->1995305984]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[18190, 469, 473, 13, 40, "RelatedLinksSection",ExpressionUUID->"1bdf0184-2708-45c6-9350-be35e1d7047e",
+Cell[25159, 626, 473, 13, 40, "RelatedLinksSection",ExpressionUUID->"1bdf0184-2708-45c6-9350-be35e1d7047e",
  CellID->2079124238],
-Cell[18666, 484, 430, 7, 19, "RelatedLinks",ExpressionUUID->"193a5af9-d1ef-4e98-803f-bc92f544bf5e",
+Cell[25635, 641, 430, 7, 19, "RelatedLinks",ExpressionUUID->"193a5af9-d1ef-4e98-803f-bc92f544bf5e",
  CellID->1726971671]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[19133, 496, 531, 14, 70, "ExamplesInitializationSection",ExpressionUUID->"e360e8db-ed82-432e-bc46-528e6e9ede22",
+Cell[26102, 653, 531, 14, 70, "ExamplesInitializationSection",ExpressionUUID->"e360e8db-ed82-432e-bc46-528e6e9ede22",
  CellID->1162574521],
-Cell[19667, 512, 161, 2, 47, "ExampleInitialization",ExpressionUUID->"0ae7a36e-d0aa-4e0a-a805-a87c4dac4cb5",
+Cell[26636, 669, 161, 2, 47, "ExampleInitialization",ExpressionUUID->"0ae7a36e-d0aa-4e0a-a805-a87c4dac4cb5",
  CellID->1583754041]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[19865, 519, 441, 12, 73, "PrimaryExamplesSection",ExpressionUUID->"c8b463f8-3457-4528-a541-41d4e6fae144",
+Cell[26834, 676, 441, 12, 73, "PrimaryExamplesSection",ExpressionUUID->"c8b463f8-3457-4528-a541-41d4e6fae144",
  CellID->94362522],
-Cell[20309, 533, 930, 26, 24, "ExampleText",ExpressionUUID->"ad8674f3-9e73-41bd-80f1-80cf6ca40a31",
+Cell[27278, 690, 930, 26, 24, "ExampleText",ExpressionUUID->"ad8674f3-9e73-41bd-80f1-80cf6ca40a31",
  CellID->1410598073],
-Cell[21242, 561, 408, 9, 27, "Input",ExpressionUUID->"263e1beb-3564-43e9-b44b-aa46892be284",
+Cell[28211, 718, 406, 9, 27, "Input",ExpressionUUID->"263e1beb-3564-43e9-b44b-aa46892be284",
  CellID->1282358346],
-Cell[21653, 572, 205, 2, 24, "ExampleText",ExpressionUUID->"040a69da-6c09-4cbc-9e8f-9b9958d12c88",
+Cell[28620, 729, 205, 2, 24, "ExampleText",ExpressionUUID->"040a69da-6c09-4cbc-9e8f-9b9958d12c88",
  CellID->80498797],
-Cell[21861, 576, 569, 10, 27, "Input",ExpressionUUID->"15e8aabd-4d71-45aa-b118-4c735c54caff",
+Cell[28828, 733, 567, 10, 27, "Input",ExpressionUUID->"15e8aabd-4d71-45aa-b118-4c735c54caff",
  CellID->1370919890]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[22467, 591, 488, 13, 58, "ExtendedExamplesSection",ExpressionUUID->"b49eb95e-d47f-4f4f-9ce8-ec74f038037e",
+Cell[29432, 748, 488, 13, 58, "ExtendedExamplesSection",ExpressionUUID->"b49eb95e-d47f-4f4f-9ce8-ec74f038037e",
  CellTags->"ExtendedExamples",
  CellID->1107975768],
-Cell[22958, 606, 241, 5, 35, "ExampleSection",ExpressionUUID->"2c62bebf-8b68-4a04-854a-a690ffaed4a5",
+Cell[29923, 763, 241, 5, 35, "ExampleSection",ExpressionUUID->"2c62bebf-8b68-4a04-854a-a690ffaed4a5",
  CellID->918029639],
-Cell[23202, 613, 265, 5, 23, "ExampleSection",ExpressionUUID->"8cd10fdf-b79b-4b23-8760-40a2a317bc90",
+Cell[30167, 770, 265, 5, 23, "ExampleSection",ExpressionUUID->"8cd10fdf-b79b-4b23-8760-40a2a317bc90",
  CellID->1801622625],
 Cell[CellGroupData[{
-Cell[23492, 622, 244, 5, 23, "ExampleSection",ExpressionUUID->"163cda48-c689-4971-a13a-dcea47ad732d",
+Cell[30457, 779, 244, 5, 23, "ExampleSection",ExpressionUUID->"163cda48-c689-4971-a13a-dcea47ad732d",
  CellID->1920864406],
 Cell[CellGroupData[{
-Cell[23761, 631, 248, 5, 26, "ExampleSubsection",ExpressionUUID->"2b1a5e03-02db-487c-a734-69838fbdd378",
+Cell[30726, 788, 248, 5, 26, "ExampleSubsection",ExpressionUUID->"2b1a5e03-02db-487c-a734-69838fbdd378",
  CellID->846406291],
-Cell[24012, 638, 254, 5, 24, "ExampleText",ExpressionUUID->"cf3de254-412d-49c6-a201-c79dddbff69a",
+Cell[30977, 795, 414, 7, 24, "ExampleText",ExpressionUUID->"cf3de254-412d-49c6-a201-c79dddbff69a",
  CellID->973146177],
-Cell[24269, 645, 363, 7, 27, "Input",ExpressionUUID->"22798860-2911-4fc9-a8e8-f202913faa6e",
+Cell[31394, 804, 363, 7, 27, "Input",ExpressionUUID->"22798860-2911-4fc9-a8e8-f202913faa6e",
  CellID->1791990584],
-Cell[24635, 654, 345, 7, 27, "Input",ExpressionUUID->"f2989373-eb88-433a-b539-af98b01806bf",
+Cell[31760, 813, 345, 7, 27, "Input",ExpressionUUID->"f2989373-eb88-433a-b539-af98b01806bf",
  CellID->1275145198],
-Cell[24983, 663, 363, 7, 27, "Input",ExpressionUUID->"0cd6c0fb-d068-440d-bce9-f6011a9b67be",
+Cell[32108, 822, 421, 9, 27, "Input",ExpressionUUID->"0cd6c0fb-d068-440d-bce9-f6011a9b67be",
  CellID->419551150],
-Cell[25349, 672, 218, 2, 24, "ExampleText",ExpressionUUID->"8611b41d-d287-408f-9c55-c7492f66a0c6",
+Cell[32532, 833, 418, 8, 27, "Input",ExpressionUUID->"9f50a741-bc57-495f-8257-dd5700eed5a4",
+ CellID->1919446231],
+Cell[32953, 843, 565, 11, 27, "Input",ExpressionUUID->"d54e1a19-6fed-4a60-9588-eff668745bb4",
+ CellID->1921739669],
+Cell[33521, 856, 228, 3, 24, "ExampleText",ExpressionUUID->"0e3ef91c-fda4-42ad-8649-c1753cadae31",
+ CellID->1597547391],
+Cell[33752, 861, 388, 8, 27, "Input",ExpressionUUID->"9bd0376f-2777-40f3-b34f-9200b63af97d",
+ CellID->1639100241],
+Cell[34143, 871, 364, 7, 27, "Input",ExpressionUUID->"479accab-bd86-4336-9d50-9cb982ab6873",
+ CellID->528432869],
+Cell[34510, 880, 444, 9, 27, "Input",ExpressionUUID->"bc335bf1-fc73-4f97-a09f-dfa2fb741837",
+ CellID->1654437551],
+Cell[34957, 891, 495, 11, 27, "Input",ExpressionUUID->"b32af151-c374-453e-87c9-fc41a003c3fc",
+ CellID->170803967],
+Cell[35455, 904, 498, 11, 27, "Input",ExpressionUUID->"95bed166-de59-4e4d-b929-5e0b5bbae791",
+ CellID->1006882340],
+Cell[35956, 917, 583, 12, 27, "Input",ExpressionUUID->"01478318-344c-40d4-a06d-67f8af6cd950",
+ CellID->555003689],
+Cell[36542, 931, 589, 12, 27, "Input",ExpressionUUID->"ee5afb5b-bc57-45d6-ab5c-ccf79cb5ee09",
+ CellID->54241911],
+Cell[CellGroupData[{
+Cell[37156, 947, 192, 2, 24, "ExampleSubsubsection",ExpressionUUID->"20656162-896a-426a-91a6-8145ecd32b32",
+ CellID->1629436634],
+Cell[37351, 951, 267, 3, 24, "ExampleText",ExpressionUUID->"8611b41d-d287-408f-9c55-c7492f66a0c6",
  CellID->1885063396],
-Cell[25570, 676, 571, 13, 47, "Input",ExpressionUUID->"50ad9895-bb38-4115-88ee-7bd906acaa22",
- CellID->1080107111],
-Cell[26144, 691, 212, 2, 24, "ExampleText",ExpressionUUID->"1a1b0465-811a-4b44-bbce-ea1ca30c16e9",
+Cell[37621, 956, 572, 13, 47, "Input",ExpressionUUID->"50ad9895-bb38-4115-88ee-7bd906acaa22",
+ CellID->1080107111]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[38230, 974, 195, 2, 24, "ExampleSubsubsection",ExpressionUUID->"6a139dc4-3d87-497c-bfe6-a3613fcea173",
+ CellID->931394840],
+Cell[38428, 978, 270, 3, 24, "ExampleText",ExpressionUUID->"1a1b0465-811a-4b44-bbce-ea1ca30c16e9",
  CellID->253860373],
-Cell[26359, 695, 665, 16, 66, "Input",ExpressionUUID->"1c607349-bc12-4c5c-8ed8-f88e6c11c531",
+Cell[38701, 983, 695, 16, 66, "Input",ExpressionUUID->"1c607349-bc12-4c5c-8ed8-f88e6c11c531",
  CellID->1728766069]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[39433, 1004, 188, 2, 24, "ExampleSubsubsection",ExpressionUUID->"32ee9b0f-b0c7-424d-88f6-06390db7acb4",
+ CellID->486469536],
+Cell[39624, 1008, 315, 4, 24, "ExampleText",ExpressionUUID->"7d450085-d91b-42cc-9a4c-da38c0befaf3",
+ CellID->1540465574],
+Cell[39942, 1014, 534, 12, 47, "Input",ExpressionUUID->"6912bee0-3c6c-4267-a597-5e7864b9f90a",
+ CellID->542053986]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[40513, 1031, 185, 2, 24, "ExampleSubsubsection",ExpressionUUID->"9b781f58-de6e-4e4d-8538-20664b8bd5f0",
+ CellID->717190074],
+Cell[40701, 1035, 360, 4, 24, "ExampleText",ExpressionUUID->"25899e2a-e097-44c3-ad63-5fd55fc5788e",
+ CellID->1308965698],
+Cell[41064, 1041, 595, 14, 66, "Input",ExpressionUUID->"f4d44459-7bbf-4443-a5fc-2641ce3ec9d2",
+ CellID->1542861820],
+Cell[41662, 1057, 398, 7, 41, "ExampleText",ExpressionUUID->"008e7228-1613-4a47-a353-323491043485",
+ CellID->24308097],
+Cell[42063, 1066, 956, 23, 85, "Input",ExpressionUUID->"cab7888b-f132-4384-9f5a-5e6c6878a311",
+ CellID->161871616]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]],
-Cell[27051, 715, 249, 5, 35, "ExampleSection",ExpressionUUID->"9c70f79c-d4a8-417c-a4c9-d01a2e1015f7",
+Cell[43058, 1094, 249, 5, 35, "ExampleSection",ExpressionUUID->"9c70f79c-d4a8-417c-a4c9-d01a2e1015f7",
  CellID->1358328512],
-Cell[27303, 722, 259, 5, 23, "ExampleSection",ExpressionUUID->"f4cfa12b-d806-48db-94e0-6051b1b379bc",
+Cell[43310, 1101, 259, 5, 23, "ExampleSection",ExpressionUUID->"f4cfa12b-d806-48db-94e0-6051b1b379bc",
  CellID->1676133574],
 Cell[CellGroupData[{
-Cell[27587, 731, 250, 5, 23, "ExampleSection",ExpressionUUID->"24eeae8c-4de8-4265-a3a6-7ced8d2197ad",
+Cell[43594, 1110, 250, 5, 23, "ExampleSection",ExpressionUUID->"24eeae8c-4de8-4265-a3a6-7ced8d2197ad",
  CellID->86496872],
-Cell[27840, 738, 464, 10, 24, "ExampleText",ExpressionUUID->"76811947-3c7d-4c9c-b00c-479720862892",
+Cell[43847, 1117, 464, 10, 24, "ExampleText",ExpressionUUID->"76811947-3c7d-4c9c-b00c-479720862892",
  CellID->430636036],
-Cell[28307, 750, 311, 7, 27, "Input",ExpressionUUID->"bfded07f-ac51-47b6-942f-f23187ef0b2e",
+Cell[44314, 1129, 311, 7, 27, "Input",ExpressionUUID->"bfded07f-ac51-47b6-942f-f23187ef0b2e",
  CellID->134369076],
-Cell[28621, 759, 269, 5, 24, "ExampleText",ExpressionUUID->"9305be59-ac36-4470-8e2c-3f0676daf022",
+Cell[44628, 1138, 269, 5, 24, "ExampleText",ExpressionUUID->"9305be59-ac36-4470-8e2c-3f0676daf022",
  CellID->1342063026],
-Cell[28893, 766, 371, 7, 27, "Input",ExpressionUUID->"a8afd9d3-ccdd-4c90-ae2a-d702bddc5023",
+Cell[44900, 1145, 371, 7, 27, "Input",ExpressionUUID->"a8afd9d3-ccdd-4c90-ae2a-d702bddc5023",
  CellID->1313218717],
-Cell[29267, 775, 369, 7, 41, "ExampleText",ExpressionUUID->"32f89b57-1284-46ff-86d6-59fef4d1c7da",
+Cell[45274, 1154, 425, 8, 41, "ExampleText",ExpressionUUID->"32f89b57-1284-46ff-86d6-59fef4d1c7da",
  CellID->458039947],
-Cell[29639, 784, 609, 13, 47, "Input",ExpressionUUID->"5f7d7630-7c1b-4e3e-97a3-0db1cb5ac8d9",
+Cell[45702, 1164, 663, 14, 47, "Input",ExpressionUUID->"5f7d7630-7c1b-4e3e-97a3-0db1cb5ac8d9",
  CellID->1184172884],
-Cell[30251, 799, 417, 9, 24, "ExampleText",ExpressionUUID->"498094a4-54cd-4f55-8a83-7172b66b2493",
+Cell[46368, 1180, 417, 9, 24, "ExampleText",ExpressionUUID->"498094a4-54cd-4f55-8a83-7172b66b2493",
  CellID->1197705892],
-Cell[30671, 810, 415, 8, 27, "Input",ExpressionUUID->"2f77fc27-010b-4378-b638-cbc66447170c",
+Cell[46788, 1191, 415, 8, 27, "Input",ExpressionUUID->"2f77fc27-010b-4378-b638-cbc66447170c",
  CellID->613350883],
-Cell[31089, 820, 268, 5, 24, "ExampleText",ExpressionUUID->"9a14b2e4-0bce-4680-8a8b-2602e8b97ed9",
+Cell[47206, 1201, 398, 8, 41, "ExampleText",ExpressionUUID->"9a14b2e4-0bce-4680-8a8b-2602e8b97ed9",
  CellID->1669632482],
-Cell[31360, 827, 417, 8, 27, "Input",ExpressionUUID->"4d6840c8-a555-4509-952e-460e1b48d734",
+Cell[47607, 1211, 475, 10, 27, "Input",ExpressionUUID->"4d6840c8-a555-4509-952e-460e1b48d734",
  CellID->863199019],
-Cell[31780, 837, 263, 5, 24, "ExampleText",ExpressionUUID->"9c00a284-2430-4523-9ab8-c1e98c9c9d61",
+Cell[48085, 1223, 322, 6, 24, "ExampleText",ExpressionUUID->"9c00a284-2430-4523-9ab8-c1e98c9c9d61",
  CellID->1490922357],
-Cell[32046, 844, 623, 14, 47, "Input",ExpressionUUID->"e815654d-217a-4848-af3f-2f4330f315fa",
+Cell[48410, 1231, 651, 14, 47, "Input",ExpressionUUID->"e815654d-217a-4848-af3f-2f4330f315fa",
  CellID->269453161],
-Cell[32672, 860, 297, 5, 41, "ExampleText",ExpressionUUID->"1376c319-8aaa-407b-a5bd-b94c1a75dcce",
+Cell[49064, 1247, 338, 6, 41, "ExampleText",ExpressionUUID->"1376c319-8aaa-407b-a5bd-b94c1a75dcce",
  CellID->485394707]
 }, Open  ]],
-Cell[32984, 868, 257, 5, 35, "ExampleSection",ExpressionUUID->"a268f6c2-5c68-40f9-9ea5-0a5c13b116da",
+Cell[49417, 1256, 257, 5, 35, "ExampleSection",ExpressionUUID->"a268f6c2-5c68-40f9-9ea5-0a5c13b116da",
  CellID->2053982332],
 Cell[CellGroupData[{
-Cell[33266, 877, 249, 5, 23, "ExampleSection",ExpressionUUID->"2295e89d-78c9-40d4-8df9-135690f40755",
+Cell[49699, 1265, 249, 5, 23, "ExampleSection",ExpressionUUID->"2295e89d-78c9-40d4-8df9-135690f40755",
  CellID->481428399],
-Cell[33518, 884, 431, 12, 24, "ExampleText",ExpressionUUID->"39e63039-2747-4697-8e1d-1f227a507273",
+Cell[49951, 1272, 431, 12, 24, "ExampleText",ExpressionUUID->"39e63039-2747-4697-8e1d-1f227a507273",
  CellID->668362729],
-Cell[33952, 898, 963, 24, 85, "Input",ExpressionUUID->"a683004d-7346-4977-8f79-828da857602d",
+Cell[50385, 1286, 1014, 24, 85, "Input",ExpressionUUID->"a683004d-7346-4977-8f79-828da857602d",
  CellID->1275521683],
-Cell[34918, 924, 220, 2, 24, "ExampleText",ExpressionUUID->"607a6e27-e93e-4ffa-a3fe-25afb02436f4",
+Cell[51402, 1312, 220, 2, 24, "ExampleText",ExpressionUUID->"607a6e27-e93e-4ffa-a3fe-25afb02436f4",
  CellID->1931800228],
-Cell[35141, 928, 1401, 30, 85, "Input",ExpressionUUID->"02972ef5-9614-466f-96f3-814e5c2c1b9d",
+Cell[51625, 1316, 1399, 30, 85, "Input",ExpressionUUID->"02972ef5-9614-466f-96f3-814e5c2c1b9d",
  CellID->2085612232]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[36591, 964, 111, 1, 72, "MetadataSection",ExpressionUUID->"39ad072b-b44f-446f-82f2-357c3e0785fb",
+Cell[53073, 1352, 111, 1, 72, "MetadataSection",ExpressionUUID->"39ad072b-b44f-446f-82f2-357c3e0785fb",
  CellID->1796203744],
-Cell[36705, 967, 477, 12, 26, "History",ExpressionUUID->"61988daf-97d2-4631-b59f-912463c7cd9a",
+Cell[53187, 1355, 477, 12, 26, "History",ExpressionUUID->"61988daf-97d2-4631-b59f-912463c7cd9a",
  CellID->1618699529],
 Cell[CellGroupData[{
-Cell[37207, 983, 485, 13, 21, "CategorizationSection",ExpressionUUID->"ede6d01a-06dc-4b2c-bea0-aec65f1bfdf3",
+Cell[53689, 1371, 485, 13, 21, "CategorizationSection",ExpressionUUID->"ede6d01a-06dc-4b2c-bea0-aec65f1bfdf3",
  CellID->1160143707],
-Cell[37695, 998, 135, 2, 35, "Categorization",ExpressionUUID->"23486ddb-ea02-4ed4-b477-c6c4f9ea359e",
+Cell[54177, 1386, 135, 2, 35, "Categorization",ExpressionUUID->"23486ddb-ea02-4ed4-b477-c6c4f9ea359e",
  CellID->1531252436],
-Cell[37833, 1002, 131, 2, 35, "Categorization",ExpressionUUID->"8b7e2920-6c86-4cb9-895c-12a874e57c1f",
+Cell[54315, 1390, 131, 2, 35, "Categorization",ExpressionUUID->"8b7e2920-6c86-4cb9-895c-12a874e57c1f",
  CellID->618855109],
-Cell[37967, 1006, 128, 2, 35, "Categorization",ExpressionUUID->"0ad8ffc7-5add-4c25-8e7d-6a099b3263a1",
+Cell[54449, 1394, 128, 2, 35, "Categorization",ExpressionUUID->"0ad8ffc7-5add-4c25-8e7d-6a099b3263a1",
  CellID->595550610],
-Cell[38098, 1010, 141, 2, 35, "Categorization",ExpressionUUID->"b74ccbe8-321e-4472-89cb-2696b633a5ad",
+Cell[54580, 1398, 141, 2, 35, "Categorization",ExpressionUUID->"b74ccbe8-321e-4472-89cb-2696b633a5ad",
  CellID->2145307250]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[38276, 1017, 111, 1, 21, "KeywordsSection",ExpressionUUID->"0b32172c-6881-4901-9b94-baca48e43be8",
+Cell[54758, 1405, 111, 1, 21, "KeywordsSection",ExpressionUUID->"0b32172c-6881-4901-9b94-baca48e43be8",
  CellID->1673970131],
-Cell[38390, 1020, 99, 1, 70, "Keywords",ExpressionUUID->"16885779-c5c5-4dc3-adc2-34cc45b4049b",
+Cell[54872, 1408, 99, 1, 70, "Keywords",ExpressionUUID->"16885779-c5c5-4dc3-adc2-34cc45b4049b",
  CellID->232732370]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[38526, 1026, 119, 1, 21, "TemplatesSection",ExpressionUUID->"311a5c29-6016-420e-b3af-a60eff3aeff3",
+Cell[55008, 1414, 119, 1, 21, "TemplatesSection",ExpressionUUID->"311a5c29-6016-420e-b3af-a60eff3aeff3",
  CellID->965221403],
-Cell[38648, 1029, 148, 2, 70, "Template",ExpressionUUID->"2ab5d0cc-32f6-4bf7-9ab2-eadf9b05a9d8",
+Cell[55130, 1417, 148, 2, 70, "Template",ExpressionUUID->"2ab5d0cc-32f6-4bf7-9ab2-eadf9b05a9d8",
  CellID->384650783],
-Cell[38799, 1033, 137, 2, 70, "Template",ExpressionUUID->"ea0c9de7-9a07-41a2-88ea-1641e577a690",
+Cell[55281, 1421, 137, 2, 70, "Template",ExpressionUUID->"ea0c9de7-9a07-41a2-88ea-1641e577a690",
  CellID->899932411],
-Cell[38939, 1037, 135, 2, 70, "Template",ExpressionUUID->"571caa86-4c2b-4ad5-acfd-ddfe80c18513",
+Cell[55421, 1425, 135, 2, 70, "Template",ExpressionUUID->"571caa86-4c2b-4ad5-acfd-ddfe80c18513",
  CellID->436705856],
-Cell[39077, 1041, 138, 2, 70, "Template",ExpressionUUID->"58fee61d-b1b5-42a6-9078-4b509403b955",
+Cell[55559, 1429, 138, 2, 70, "Template",ExpressionUUID->"58fee61d-b1b5-42a6-9078-4b509403b955",
  CellID->1763699993]
 }, Closed]]
 }, Open  ]]
