@@ -321,7 +321,7 @@ ClearAll[QNMFrequencyInterpolation];
 
 Options[QNMFrequencyInterpolation] = Options[Interpolation];
 
-QNMData[file_, dataset_] := QNMData[file, dataset] = Quiet[Import[file, {"Datasets", dataset}, "ComplexKeys"->{"r", "i"}];, {Import::general, Import::noelem, Import::nffil}];
+QNMData[file_, dataset_] := QNMData[file, dataset] = Quiet[Import[file, {"Datasets", dataset}, "ComplexKeys"->{"r", "i"}], {Import::general, Import::noelem, Import::nffil}];
 
 QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] :=
  Module[{h5file, dataset, data, ret},
