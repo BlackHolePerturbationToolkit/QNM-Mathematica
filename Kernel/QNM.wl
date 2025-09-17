@@ -236,6 +236,31 @@ b[a_] := Sqrt[4 M^2 - 4 a^2];
 \[Gamma]ang[i_, \[Omega]_, s_, m_, a_]:= 2 a \[Omega] (i + k1[m, s] + k2[m, s] + s);
 
 
+(* ::Subsection::Closed:: *)
+(*Continued fraction*)
+
+
+(* ::Text:: *)
+(*This is preferred over Mathematica's ContinedFractionK function as we can get an error estimate on the result using this function.*)
+
+
+CF[a_, b_, {n_, n0_}] := 
+  Module[{A, B, ak, bk, res = Indeterminate, j = n0},
+   A[n0 - 2] = 1;
+   B[n0 - 2] = 0;
+   ak[k_] := ak[k] = (a /. n -> k);
+   bk[k_] := bk[k] = (b /. n -> k);
+   A[n0 - 1] = 0(*bk[n0-1]*);
+   B[n0 - 1] = 1;
+   A[k_] := A[k] = bk[k] A[k - 1] + ak[k] A[k - 2];
+   B[k_] := B[k] = bk[k] B[k - 1] + ak[k] B[k - 2];
+   While[Quiet[Check[Abs[1-(A[j-1]/B[j-1])/(A[j]/B[j])], j--; False, General::munfl], General::munfl] > 10^(1-Precision[A[j]/B[j]]), j++];
+   res = A[j]/B[j];
+   Clear[A, B, ak, bk];
+   res
+];
+
+
 (* ::Section::Closed:: *)
 (*QNMFrequency*)
 
@@ -498,6 +523,60 @@ SpectralInitialGuessKerr[s_, m_, a_, opts:OptionsPattern[]] :=
 
 
 (* ::Subsection::Closed:: *)
+(*Leaver method*)
+
+
+(* ::Text:: *)
+(*Calculation based on the method in Leaver, Proc. R. Soc. Lond. A. 402, 1985, Nollert, Phys. Rev. D, Vol. 47, 1993 as well as the code provided online by Emanuele Berti, https://pages.jh.edu/~eberti2/ringdown/.*)
+
+
+(* Equations of which the QNMs and spheroidal eigenvalues are roots *)
+Leaver[\[Omega]_?NumericQ, s_?IntegerQ, l_?IntegerQ, nInv_?IntegerQ] :=
+ Module[{n},
+  \[Delta][nInv, \[Omega], s, l] + ContinuedFractionK[-\[Alpha][nInv-n, \[Omega]] \[Gamma][nInv-n+1, \[Omega], s], \[Delta][nInv-n,\[Omega],s, l], {n,1,nInv}] + CF[-\[Alpha][n-1, \[Omega]] \[Gamma][n, \[Omega], s], \[Delta][n, \[Omega], s, l], {n, nInv+1}]
+];
+  
+Leaver31[\[Omega]_?NumericQ, s_?IntegerQ, l_?IntegerQ, m_?IntegerQ, a_?NumericQ, nInv_?IntegerQ] := Module[{Alm, n},
+  Alm = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]] + 2 a m \[Omega] - a^2 \[Omega]^2;
+  \[Beta]freq[nInv, \[Omega], Alm, s, m, a] + ContinuedFractionK[-\[Alpha]freq[nInv-n, \[Omega], s, m, a] \[Gamma]freq[nInv-n+1, \[Omega], s, m, a], \[Beta]freq[nInv-n,\[Omega], Alm, s, m, a], {n, 1, nInv}] + CF[-\[Alpha]freq[n-1, \[Omega], s, m, a] \[Gamma]freq[n, \[Omega], s, m, a], \[Beta]freq[n, \[Omega], Alm, s, m, a], {n, nInv+1}]
+];
+
+Leaver31Ang[\[Omega]_?NumericQ, Alm_?NumericQ, s_?IntegerQ, m_?IntegerQ, a_?NumericQ, nInv_?IntegerQ] := Module[{n},
+  \[Beta]ang[nInv, \[Omega], Alm, s, m, a] + ContinuedFractionK[-\[Alpha]ang[nInv-n, \[Omega], s, m, a] \[Gamma]ang[nInv-n+1, \[Omega], s, m, a], \[Beta]ang[nInv-n,\[Omega], Alm, s, m, a], {n, 1, nInv}] + CF[-\[Alpha]ang[n-1, \[Omega], s, m, a] \[Gamma]ang[n, \[Omega], s, m, a], \[Beta]ang[n, \[Omega], Alm, s, m, a], {n, nInv+1}]
+];
+
+
+Options[QNMFrequencyLeaver] = {"InitialGuess" -> Automatic};
+
+
+QNMFrequencyLeaver[s_Integer, l_Integer, m_Integer, n_, a_, OptionsPattern[]] :=
+ Module[{\[Omega]guess, \[Omega]QNM, inInc, nInv = n, k, funcRad, funcAng, prec = prec[a]},
+  \[Omega]guess=OptionValue["InitialGuess"];
+  If[\[Omega]guess === Automatic,
+    \[Omega]guess = Quiet[QNMFrequencyInterpolation[s, l, m, n][a], QNMFrequency::nointerp];
+  ];
+  If[\[Omega]guess == $Failed, 
+    Message[QNMFrequency::nointerp, s, l, m, n];
+    If[a==0,
+      Which[
+        l <= Max[n,2], 
+        \[Omega]guess = SpectralInitialGuess[s, l, n];,
+        l>n,
+        \[Omega]guess = Schwarzfinit1[s, l, n];
+      ];,
+      \[Omega]guess = Kerrfinit[s, l, m, n, a];
+    ];
+  ];
+  If[a==0,
+    funcRad[\[Omega]_?NumericQ] := funcRad[\[Omega]] = Leaver[\[Omega], s, l, nInv];,
+    funcRad[\[Omega]_?NumericQ] := funcRad[\[Omega]] = Leaver31[\[Omega], s, l, m, a, nInv];    
+  ];
+  \[Omega]QNM /. Check[FindRoot[funcRad[\[Omega]QNM]==0, {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec], \[Omega]QNM -> $Failed, FindRoot::nlnum];
+  \[Omega]QNM /. Quiet[Check[FindRoot[funcRad[\[Omega]QNM]==0, {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec], \[Omega]QNM -> $Failed, FindRoot::nlnum], FindRoot::nlnum]
+];
+
+
+(* ::Subsection::Closed:: *)
 (*QNMFrequency*)
 
 
@@ -539,7 +618,15 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
         Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       ];
       \[Omega] = QNMFrequencyInIncidenceAmplitude[s, l, m, n, a, opts];,
-    Automatic | "SpheroidalEigenvalue",
+    "Leaver",
+      \[Omega] = QNMFrequencyLeaver[s, l, m, n, a],
+    {"Leaver", Rule[_,_]...},
+      opts = FilterRules[Rest[OptionValue[Method]], Options[QNMFrequencyLeaver]];
+      If[opts =!= Rest[OptionValue[Method]],
+        Message[QNMFrequency::optx, Method -> OptionValue[Method]];
+      ];
+      \[Omega] = QNMFrequencyLeaver[s, l, m, n, a, opts];,
+   Automatic | "SpheroidalEigenvalue",
       \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a];,
     {"SpheroidalEigenvalue", Rule[_,_]...},
 	  opts = FilterRules[Rest[OptionValue[Method]], Options[QNMFrequencyHyperboloidal]];
