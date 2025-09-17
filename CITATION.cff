@@ -51,4 +51,4 @@ abstract: >-
   A Mathematica package for computing quasinormal mode
   solutions to the Teukolsky equation.
 license: MIT
-version: 0.3.0
+version: 0.4.0
