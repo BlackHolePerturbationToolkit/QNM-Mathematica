@@ -28,4 +28,4 @@ In addition to acknowledging the Black Hole Perturbation Toolkit as suggested on
 
 ## Authors and contributors
 
-Barry Wardell, Christiana Pantelidou, Brad Cownden and Jake Mac Uilliam
+Barry Wardell, Christiana Pantelidou, Brad Cownden, Jake Mac Uilliam, Conor O'Toole, Rodrigo Macedo, Jamil Assaad
