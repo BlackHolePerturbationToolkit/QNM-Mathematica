@@ -705,7 +705,7 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
 
   (* Check a valid Coordinates option has been specified *)
   coords = OptionValue["Coordinates"];
-  If[!MemberQ[{"BL", "Boyer-Lindquist", "BoyerLindquist","Hyperboloidal"}, coords],
+  If[!MemberQ[{"BL", "Boyer-Lindquist", "BoyerLindquist", "Hyperboloidal", "CompactifiedHyperboloidal"}, coords],
     Message[QNMRadial::coords, coords];
     Return[$Failed];
   ];
