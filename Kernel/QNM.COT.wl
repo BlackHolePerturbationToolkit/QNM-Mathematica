@@ -53,7 +53,6 @@ QNMFrequency::cmplx = "Only real values of a are allowed, but a=`1` specified.";
 QNMFrequency::nokerr = "Method \"`1`\" only supported for Schwarzschild spacetime, but a=`2` specified.";
 QNMFrequency::acc = "Accuracy of the calculated quasinormal mode frequency `1` is lower than that of the initial guess `2`.";
 QNMFrequency::noacc = "Failed estimating accuracy of the calculated quasinormal mode frequency `1` compared to the initial guess `2`.";
-QNMFrequency::allln = "Method `1` can only be used with l=All and n=All to compute a set of frequencies but l=`2` and n=`3` specified.";
 QNMRadial::optx = "Unknown options in `1`.";
 QNMRadial::params = "Invalid parameters s=`1`, l=`2`, m=`3`, n=`4`.";
 QNMRadial::coords = "Coordinate options are either \"BL\", \"Boyer-Lindquist\", or \"Hyperboloidal\", but got `1`.";
@@ -105,58 +104,6 @@ rm[a_, M_] := M-Sqrt[M^2-a^2];
   B = (a^2-16M^2)\[Omega]^2+2(m a +2 I s M)\[Omega]+2(4(a^2-4M^2)M \[Omega]^2+(4 m a M-4I (s+2) M^2+I a^2)\[Omega]+ I m a+(s+1)M)\[Rho]+2(8 M^2 \[Omega]^2+6 I M \[Omega]-1)a^2 \[Rho]^2;
   -\[Rho]^2 \[CapitalDelta] d2R + A dR + (B+(\[Lambda] + 2 a m \[Omega] - (a \[Omega])^2)) R
 ]
-
-
-(* ::Subsection::Closed:: *)
-(*Discretised 2D Teukolsky operator on a hyperboloidal slice*)
-
-
-\[ScriptCapitalM]2D[s_, m_, a_, nx_, nz_] :=
- Module[{\[Chi], z0, z1, \[CapitalDelta]z, z, x, Id, Zero, Dx, D2x, D\[Sigma], D2\[Sigma], L1\[Sigma]\[Sigma], L1\[Sigma], L10, L1xx, L1x, L2\[Sigma], L20, W, L1, L2,
-         rh, \[Kappa], \[Stigma], \[Lambda], \[Delta]1, \[Delta]2, \[Sigma], X},
-  (* Constants *)
-  rh = rp[a, M];
-  \[Kappa] = a/rh;
-  \[Stigma] = s;
-  \[Lambda] = M;
-  \[Delta]1 = Abs[m-s];
-  \[Delta]2 = Abs[m+s];
-
-  (* Radial and angular coordinates *)
-  z0 = 0;
-  z1 = 1;
-  \[CapitalDelta]z = z1-z0;
-  \[Chi] = N@Reverse[Cos[\[Pi] Subdivide[nz-1]]];
-  z = z0+1/2 \[CapitalDelta]z*(1+\[Chi]);
-  x = N@Reverse[Cos[\[Pi] Subdivide[nx-1]]];
-
-  (* Discretised operators *)
-  Id = IdentityMatrix[nx*nz];
-  Zero = ConstantArray[0, {nx*nz, nx*nz}];
-  Dx  = NDSolve`FiniteDifferenceDerivative[Derivative[0,1], {z, x}, DifferenceOrder -> {"Pseudospectral", "Pseudospectral"}, PeriodicInterpolation -> {False, False}]["DifferentiationMatrix"];
-  D2x = NDSolve`FiniteDifferenceDerivative[Derivative[0,2], {z, x}, DifferenceOrder -> {"Pseudospectral", "Pseudospectral"}, PeriodicInterpolation -> {False, False}]["DifferentiationMatrix"];
-  D\[Sigma]  = NDSolve`FiniteDifferenceDerivative[Derivative[1,0], {z, x}, DifferenceOrder -> {"Pseudospectral", "Pseudospectral"}, PeriodicInterpolation -> {False, False}]["DifferentiationMatrix"];
-  D2\[Sigma] = NDSolve`FiniteDifferenceDerivative[Derivative[2,0], {z, x}, DifferenceOrder -> {"Pseudospectral", "Pseudospectral"}, PeriodicInterpolation -> {False, False}]["DifferentiationMatrix"];
-
-  (* Coordinates on the full (flattened) 2D grid *)
-  {\[Sigma], X} = {Flatten[Outer[#1&, z, x]], Flatten[Outer[#2&, z, x]]};
-
-  L1xx = 1-X^2;
-  L1x = \[Delta]1-\[Delta]2-X (2+\[Delta]1+\[Delta]2);
-  
-  L1\[Sigma]\[Sigma] = (-1+\[Sigma]) \[Sigma]^2 (-1+\[Kappa]^2 \[Sigma]);
-  L1\[Sigma] = \[Sigma] (4 \[Kappa]^2 \[Sigma]^2+2 (1+\[Stigma])-\[Sigma] (2 I m \[Kappa]+(1+\[Kappa]^2) (3+\[Stigma])));
-  L10 = 1/2 (-m^2-\[Delta]2-\[Delta]1 (1+\[Delta]2)-4 I m \[Kappa] \[Sigma]+4 \[Kappa]^2 \[Sigma]^2-2 (1+\[Kappa]^2) \[Sigma] (1+\[Stigma])+\[Stigma] (2+\[Stigma]));
-  
-  L2\[Sigma] = (2 rh (1+\[Sigma]^2 (-2+2 \[Kappa]^4 (-1+\[Sigma])+\[Kappa]^2 (-3+2 \[Sigma]))))/\[Lambda];
-  L20 = (2 rh (3 (\[Kappa]^2+\[Kappa]^4) \[Sigma]^2-I m (\[Kappa]+2 \[Kappa] (1+\[Kappa]^2) \[Sigma])+\[Stigma]+\[Kappa] (-I X+\[Kappa]) \[Stigma]-\[Sigma] (2+\[Stigma]+\[Kappa]^4 (2+\[Stigma])+\[Kappa]^2 (3+2 \[Stigma]))))/\[Lambda];
-  
-  W = (rh^2 (4 (1+\[Sigma])+\[Kappa]^2 (7+X^2+4 \[Kappa]^2+4 (2+2 \[Kappa]^2+\[Kappa]^4) \[Sigma]-4 (1+\[Kappa]^2)^2 \[Sigma]^2)))/\[Lambda]^2;
-  
-  L1 = L1\[Sigma]\[Sigma] D2\[Sigma] + L1\[Sigma] D\[Sigma] + L10 Id + L1xx D2x + L1x Dx;
-  L2 = L2\[Sigma] D\[Sigma] + L20 Id;
-  ArrayFlatten[{{Zero, Id}, {L1/W, L2/W}}]
-];
 
 
 (* ::Subsection::Closed:: *)
@@ -236,32 +183,7 @@ b[a_] := Sqrt[4 M^2 - 4 a^2];
 \[Gamma]ang[i_, \[Omega]_, s_, m_, a_]:= 2 a \[Omega] (i + k1[m, s] + k2[m, s] + s);
 
 
-(* ::Subsection::Closed:: *)
-(*Continued fraction*)
-
-
-(* ::Text:: *)
-(*This is preferred over Mathematica's ContinedFractionK function as we can get an error estimate on the result using this function.*)
-
-
-CF[a_, b_, {n_, n0_}] := 
-  Module[{A, B, ak, bk, res = Indeterminate, j = n0},
-   A[n0 - 2] = 1;
-   B[n0 - 2] = 0;
-   ak[k_] := ak[k] = (a /. n -> k);
-   bk[k_] := bk[k] = (b /. n -> k);
-   A[n0 - 1] = 0(*bk[n0-1]*);
-   B[n0 - 1] = 1;
-   A[k_] := A[k] = bk[k] A[k - 1] + ak[k] A[k - 2];
-   B[k_] := B[k] = bk[k] B[k - 1] + ak[k] B[k - 2];
-   While[Quiet[Check[Abs[1-(A[j-1]/B[j-1])/(A[j]/B[j])], j--; False, General::munfl], General::munfl] > 10^(1-Precision[A[j]/B[j]]), j++];
-   res = A[j]/B[j];
-   Clear[A, B, ak, bk];
-   res
-];
-
-
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*QNMFrequency*)
 
 
@@ -346,13 +268,11 @@ ClearAll[QNMFrequencyInterpolation];
 
 Options[QNMFrequencyInterpolation] = Options[Interpolation];
 
-QNMData[file_, dataset_] := QNMData[file, dataset] = Quiet[Import[file, {"Datasets", dataset}, "ComplexKeys"->{"r", "i"}], {Import::general, Import::noelem, Import::nffil}];
-
-QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] :=
+QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] := QNMFrequencyInterpolation[s, l, m, n] =
  Module[{h5file, dataset, data, ret},
   h5file = FileNameJoin[{$QNMDataDirectory, "QNM_s"<>ToString[s]<>".h5"}];
   dataset = "/l"<>ToString[l]<>"/m"<>ToString[m]<>"/n"<>ToString[n];
-  data = QNMData[h5file, dataset];
+  Quiet[data = Import[h5file, {"Datasets", dataset}, "ComplexKeys"->{"r", "i"}];, {Import::general, Import::noelem, Import::nffil}];
   If[MatchQ[data, <|"a"->_, "omega"->_|>],
     ret = Interpolation[Transpose[Lookup[data, {"a","omega"}]], opts];,
     Message[QNMFrequency::nointerp, s, l, m, n];
@@ -362,7 +282,7 @@ QNMFrequencyInterpolation[s_, l_, m_, n_, opts:OptionsPattern[]] :=
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Calculate QNM frequency by finding zero of incidence amplitude*)
 
 
@@ -503,77 +423,104 @@ SpectralInitialGuess[s_, l_, n_] :=
 
 
 (* ::Subsection::Closed:: *)
-(*Assaad-Macedo hyperboloidal method in Kerr*)
-
-
-(* ::Text:: *)
-(*Spectral method using hyperboloidal slicing in Kerr. This technique was adapted from a version kindly provided by Rodrigo Macedo. The technique is outlined in detail in Assaad and Macedo, arXiv:2506.04326.*)
-
-
-Options[SpectralInitialGuessKerr] = {"NumAngularPoints" -> 10, "NumRadialPoints" -> 10};
-
-
-SpectralInitialGuessKerr[s_, m_, a_, opts:OptionsPattern[]] :=
- Module[{nAng, nRad},
-  nAng = OptionValue["NumAngularPoints"];
-  nRad = OptionValue["NumRadialPoints"];
-  
-  ReverseSortBy[I Eigenvalues[\[ScriptCapitalM]2D[s, m, a, nAng, nRad]], Im]
-];
-
-
-(* ::Subsection::Closed:: *)
 (*Leaver method*)
 
 
 (* ::Text:: *)
-(*Calculation based on the method in Leaver, Proc. R. Soc. Lond. A. 402, 1985, Nollert, Phys. Rev. D, Vol. 47, 1993 as well as the code provided online by Emanuele Berti, https://pages.jh.edu/~eberti2/ringdown/.*)
+(*Functions for conducting the actual computations based on the work detailed in Leaver, Proc. R. Soc. Lond. A. 402, 1985, Nollert, Phys. Rev. D, Vol. 47, 1993 as well as the code provided online by Emanuele Berti, https://pages.jh.edu/~eberti2/ringdown/.*)
+(**)
+(*The functions for the continued fraction provide the actual equations of which the QNMs and spheroidal eigenvalues are roots.These functions allow for the n-th inversion to be easily identified, and make use of memoization to improve efficiency by avoiding repeated calls to the same functions.*)
 
 
-(* Equations of which the QNMs and spheroidal eigenvalues are roots *)
-Leaver[\[Omega]_?NumericQ, s_?IntegerQ, l_?IntegerQ, nInv_?IntegerQ] :=
- Module[{n},
-  \[Delta][nInv, \[Omega], s, l] + ContinuedFractionK[-\[Alpha][nInv-n, \[Omega]] \[Gamma][nInv-n+1, \[Omega], s], \[Delta][nInv-n,\[Omega],s, l], {n,1,nInv}] + CF[-\[Alpha][n-1, \[Omega]] \[Gamma][n, \[Omega], s], \[Delta][n, \[Omega], s, l], {n, nInv+1}]
+(*Would be nice to remove the While loops and replace with something like FixedPoint *)
+
+ContFrac[\[Omega]_,s_, l_, nInv_] := Module [{A,B,ak,bk,res=Indeterminate, j = nInv+1},
+A[(nInv+1)-2, \[Omega]]=1;
+B[(nInv+1)-2, \[Omega]]=0;
+ak[k_, \[Omega]]:=ak[k, \[Omega]]=-\[Alpha][k-1, \[Omega]] \[Gamma][k, \[Omega], s];
+bk[k_, \[Omega]]:=bk[k, \[Omega]]=\[Delta][k, \[Omega], s, l];
+A[(nInv+1)-1, \[Omega]]=0;
+B[(nInv+1)-1, \[Omega]]=1;
+A[k_, \[Omega]]:=A[k, \[Omega]]=bk[k, \[Omega]] A[k-1, \[Omega]]+ak[k, \[Omega]] A[k-2, \[Omega]];
+B[k_, \[Omega]]:= B[k, \[Omega]]=bk[k, \[Omega]] B[k-1, \[Omega]]+ak[k, \[Omega]] B[k-2, \[Omega]];
+res = A[j-1, \[Omega]]/B[j-1, \[Omega]];
+While[res =!=(res=A[j, \[Omega]]/B[j, \[Omega]]),res = A[j, \[Omega]]/B[j, \[Omega]]; j++];
+res
 ];
-  
-Leaver31[\[Omega]_?NumericQ, s_?IntegerQ, l_?IntegerQ, m_?IntegerQ, a_?NumericQ, nInv_?IntegerQ] := Module[{Alm, n},
-  Alm = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]] + 2 a m \[Omega] - a^2 \[Omega]^2;
-  \[Beta]freq[nInv, \[Omega], Alm, s, m, a] + ContinuedFractionK[-\[Alpha]freq[nInv-n, \[Omega], s, m, a] \[Gamma]freq[nInv-n+1, \[Omega], s, m, a], \[Beta]freq[nInv-n,\[Omega], Alm, s, m, a], {n, 1, nInv}] + CF[-\[Alpha]freq[n-1, \[Omega], s, m, a] \[Gamma]freq[n, \[Omega], s, m, a], \[Beta]freq[n, \[Omega], Alm, s, m, a], {n, nInv+1}]
+
+
+(* For computing the QNM in Kerr *)
+ContFracfreq[\[Omega]_, Alm_,s_, m_, a_, nInv_] := Module [{A,B,ak,bk,res=Indeterminate, j = nInv+1},
+A[(nInv+1)-2, \[Omega]]=1;
+B[(nInv+1)-2, \[Omega]]=0;
+ak[k_, \[Omega]]:=ak[k, \[Omega]]=-\[Alpha]freq[k-1, \[Omega], s, m, a] \[Gamma]freq[k, \[Omega], s, m, a];
+bk[k_, \[Omega]]:=bk[k, \[Omega]]=\[Beta]freq[k, \[Omega], Alm, s, m, a];
+A[(nInv+1)-1, \[Omega]]=0;
+B[(nInv+1)-1, \[Omega]]=1;
+A[k_, \[Omega]]:=A[k, \[Omega]]=bk[k, \[Omega]] A[k-1, \[Omega]]+ak[k, \[Omega]] A[k-2, \[Omega]];
+B[k_, \[Omega]]:= B[k, \[Omega]]=bk[k, \[Omega]] B[k-1, \[Omega]]+ak[k, \[Omega]] B[k-2, \[Omega]];
+res = A[j-1, \[Omega]]/B[j-1, \[Omega]];
+While[res =!=(res=A[j, \[Omega]]/B[j, \[Omega]]),res = A[j, \[Omega]]/B[j, \[Omega]]; j++];
+res
 ];
 
-Leaver31Ang[\[Omega]_?NumericQ, Alm_?NumericQ, s_?IntegerQ, m_?IntegerQ, a_?NumericQ, nInv_?IntegerQ] := Module[{n},
-  \[Beta]ang[nInv, \[Omega], Alm, s, m, a] + ContinuedFractionK[-\[Alpha]ang[nInv-n, \[Omega], s, m, a] \[Gamma]ang[nInv-n+1, \[Omega], s, m, a], \[Beta]ang[nInv-n,\[Omega], Alm, s, m, a], {n, 1, nInv}] + CF[-\[Alpha]ang[n-1, \[Omega], s, m, a] \[Gamma]ang[n, \[Omega], s, m, a], \[Beta]ang[n, \[Omega], Alm, s, m, a], {n, nInv+1}]
+
+(* For computing the Alm in Kerr *)
+ContFracang[\[Omega]_,Alm_,s_, m_, a_, nInv_] := Module [{A,B,ak,bk,res=Indeterminate, j = nInv+1},
+A[(nInv+1)-2, \[Omega]]=1;
+B[(nInv+1)-2, \[Omega]]=0;
+ak[k_, \[Omega]]:=ak[k, \[Omega]]=-\[Alpha]ang[k-1, \[Omega], s, m, a] \[Gamma]ang[k, \[Omega], s, m, a];
+bk[k_, \[Omega]]:=bk[k, \[Omega]]=\[Beta]ang[k, \[Omega], Alm, s, m, a];
+A[(nInv+1)-1, \[Omega]]=0;
+B[(nInv+1)-1, \[Omega]]=1;
+A[k_, \[Omega]]:=A[k, \[Omega]]=bk[k, \[Omega]] A[k-1, \[Omega]]+ak[k, \[Omega]] A[k-2, \[Omega]];
+B[k_, \[Omega]]:= B[k, \[Omega]]=bk[k, \[Omega]] B[k-1, \[Omega]]+ak[k, \[Omega]] B[k-2, \[Omega]];
+res = A[j-1, \[Omega]]/B[j-1, \[Omega]];
+While[res =!=(res=A[j, \[Omega]]/B[j, \[Omega]]),res = A[j, \[Omega]]/B[j, \[Omega]]; j++];
+res
 ];
 
 
-Options[QNMFrequencyLeaver] = {"InitialGuess" -> Automatic};
+(* We use the n-th inversion, for which the n-th overtone is the most stable solution *)
+Leaver[\[Omega]_?NumericQ, s_?IntegerQ, l_?IntegerQ, nInv_?IntegerQ] := \[Delta][nInv,\[Omega], s, l] + ContinuedFractionK[-\[Alpha][nInv-i, \[Omega]] \[Gamma][nInv-i+1, \[Omega], s],\[Delta][nInv-i,\[Omega],s, l],{i,1,nInv}] + ContFrac[\[Omega], s, l, nInv];
+
+Leaver31[\[Omega]_?NumericQ, Alm_?NumericQ, s_?IntegerQ, m_?IntegerQ, a_?NumericQ, nInv_?IntegerQ] := \[Beta]freq[nInv,\[Omega], Alm, s, m, a]+ContinuedFractionK[-\[Alpha]freq[nInv-i, \[Omega], s, m, a] \[Gamma]freq[nInv-i+1, \[Omega], s, m, a],\[Beta]freq[nInv-i,\[Omega], Alm, s, m, a],{i,1,nInv}] + ContFracfreq[\[Omega], Alm,s, m, a, nInv];
+Leaver31ang[\[Omega]_?NumericQ, Alm_?NumericQ, s_?IntegerQ, m_?IntegerQ, a_?NumericQ, nInv_?IntegerQ] := \[Beta]ang[nInv,\[Omega], Alm, s, m, a]+ContinuedFractionK[-\[Alpha]ang[nInv-i, \[Omega], s, m, a] \[Gamma]ang[nInv-i+1, \[Omega], s, m, a],\[Beta]ang[nInv-i,\[Omega], Alm, s, m, a],{i,1,nInv}] + ContFracang[\[Omega], Alm,s, m, a, nInv];
 
 
-QNMFrequencyLeaver[s_Integer, l_Integer, m_Integer, n_, a_, OptionsPattern[]] :=
- Module[{\[Omega]guess, \[Omega]QNM, inInc, nInv = n, k, funcRad, funcAng, prec = prec[a]},
-  \[Omega]guess=OptionValue["InitialGuess"];
-  If[\[Omega]guess === Automatic,
-    \[Omega]guess = Quiet[QNMFrequencyInterpolation[s, l, m, n][a], QNMFrequency::nointerp];
-  ];
-  If[\[Omega]guess == $Failed, 
-    Message[QNMFrequency::nointerp, s, l, m, n];
-    If[a==0,
-      Which[
-        l <= Max[n,2], 
-        \[Omega]guess = SpectralInitialGuess[s, l, n];,
-        l>n,
-        \[Omega]guess = Schwarzfinit1[s, l, n];
-      ];,
-      \[Omega]guess = Kerrfinit[s, l, m, n, a];
-    ];
-  ];
-  If[a==0,
-    funcRad[\[Omega]_?NumericQ] := funcRad[\[Omega]] = Leaver[\[Omega], s, l, nInv];,
-    funcRad[\[Omega]_?NumericQ] := funcRad[\[Omega]] = Leaver31[\[Omega], s, l, m, a, nInv];    
-  ];
-  \[Omega]QNM /. Check[FindRoot[funcRad[\[Omega]QNM]==0, {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec], \[Omega]QNM -> $Failed, FindRoot::nlnum];
-  \[Omega]QNM /. Quiet[Check[FindRoot[funcRad[\[Omega]QNM]==0, {\[Omega]QNM, SetPrecision[\[Omega]guess, prec]}, WorkingPrecision -> prec], \[Omega]QNM -> $Failed, FindRoot::nlnum], FindRoot::nlnum]
-];
+(*(*Selection of initial seed method *)
+(*Ideally, we would first check how well this satisfies the eq to be solved.
+ If within the user's desired accuracy, just return the initial guess.
+ Would be faster *)
+Which[l <= Max[n,2], finit = SpectralInitialGuess[s, l, n],  l>n , finit = Schwarzfinit1[s, l, n]];
+
+Sol = Values[FindRoot[{Re[Leaver[x +I y, s, l, NInv]] == 0, Im[Leaver[x + I y, s, l, NInv]] == 0}, {x,Re[finit]}, {y, Im[finit]}]]];
+
+freq = Sol[[1]] + I Sol[[2]];
+
+(* We specifically return all QNMs in the 4th quadrant.
+So Re[\[Omega]] > 0, Im[\[Omega]] < 0
+This is simply the chosen convention.
+*)
+If[Re[freq] < 0 && Im[freq] < 0, freqtemp = -Conjugate[freq]; freq = freqtemp]; *)
+
+
+(*NInv = n;
+Ainit = KerrAinit[s, l, m, n, a];
+finit = Kerrfinit[s, l, m, n, a];
+Ainit = KerrAinit[s, l, m, n, a];
+finit = Kerrfinit[s, l, m, n, a];
+(*Print[finit, " ", Ainit];*)
+
+Sol = Values[FindRoot[{Re[Leaver31[\[Omega]x + \[Omega]y I, Ax + Ay I, s, m, a, NInv]]==0, Im[Leaver31[\[Omega]x + \[Omega]y I, Ax + Ay I, s, m, a, NInv]]==0, Re[Leaver31ang[\[Omega]x + \[Omega]y I, Ax + Ay I, s, m, a, NInv]]==0, Im[Leaver31ang[\[Omega]x + \[Omega]y I, Ax + Ay I, s, m, a, NInv]]==0},{\[Omega]x, Re[finit]}, {\[Omega]y, Im[finit]}, {Ax, Re[Ainit](*, 0.6 Re[Ainit], 100 Re[Ainit]*)}, {Ay, Im[Ainit](*, 0.6 Im[Ainit], 100 Im[Ainit]*)}]];
+
+freq = Sol[[1]] + I Sol[[2]];
+(* A may be returned as well. However, the SpinWeighted SpheroidalHarmonics package can calculate these *)
+(*A = Sol[[3]] + I Sol[[4]];
+*)
+If[Re[freq] < 0 && Im[freq] < 0, freqtemp = -Conjugate[freq]; freq = freqtemp];  (* Want to return all solutions in lower right quadrant for consistency *)
+
+freq*)
 
 
 (* ::Subsection::Closed:: *)
@@ -618,45 +565,21 @@ QNMFrequency[s_, l_, m_, n_, a_?InexactNumberQ, OptionsPattern[]] :=
         Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       ];
       \[Omega] = QNMFrequencyInIncidenceAmplitude[s, l, m, n, a, opts];,
-    "Leaver",
-      \[Omega] = QNMFrequencyLeaver[s, l, m, n, a],
-    {"Leaver", Rule[_,_]...},
-      opts = FilterRules[Rest[OptionValue[Method]], Options[QNMFrequencyLeaver]];
-      If[opts =!= Rest[OptionValue[Method]],
-        Message[QNMFrequency::optx, Method -> OptionValue[Method]];
-      ];
-      \[Omega] = QNMFrequencyLeaver[s, l, m, n, a, opts];,
-   Automatic | "SpheroidalEigenvalue",
+    Automatic | "Hyperboloidal",
       \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a];,
-    {"SpheroidalEigenvalue", Rule[_,_]...},
+    {"Hyperboloidal", Rule[_,_]...},
 	  opts = FilterRules[Rest[OptionValue[Method]], Options[QNMFrequencyHyperboloidal]];
       If[opts =!= Rest[OptionValue[Method]],
         Message[QNMFrequency::optx, Method -> OptionValue[Method]];
       ];
       \[Omega] = QNMFrequencyHyperboloidal[s, l, m, n, a, opts];,
-    "Spectral1D",
+    "Ansorg-Macedo",
       If[a!=0,
-        Message[QNMFrequency::nokerr, "Spectral1D", a];
+        Message[QNMFrequency::nokerr, "Ansorg-Macedo", a];
         \[Omega] = $Failed;
         ,
         \[Omega] = SpectralInitialGuess[s, l, n];
       ];,
-    "Spectral2D",
-      If[l =!= All || n =!= All,
-        Message[QNMFrequency::allln, "Spectral2D", l, n];
-        \[Omega] = $Failed;,
-        \[Omega] = SpectralInitialGuessKerr[s, m, a];
-      ];,
-    {"Spectral2D", Rule[_,_]...},
-      opts = FilterRules[Rest[OptionValue[Method]], Options[SpectralInitialGuessKerr]];
-      If[opts =!= Rest[OptionValue[Method]],
-        Message[QNMFrequency::optx, Method -> OptionValue[Method]];
-      ];
-      If[l!= All || n!= All,
-        Message[QNMFrequency::allln, "Spectral2D", l, n];
-        \[Omega] = $Failed;,
-  	  \[Omega] = SpectralInitialGuessKerr[s, m, a, opts];
-  	];,
     "Large-l Asymptotic",
       If[a == 0,
         \[Omega] = Schwarzfinit1[s, l, n];,
@@ -699,7 +622,7 @@ Options[QNMRadialHyperboloidal] = {
 
 
 QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
- Module[{\[Lambda], ef, ns, Mat, RadialFunction, h, h\[Phi], numpoints, coords, domain},
+ Module[{\[Lambda], ef, ns, Mat, RadialFunction, h, h\[Phi], numpoints, coords},
   (* Load options values *)
   numpoints = OptionValue["NumPoints"];
 
@@ -723,18 +646,13 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
 
   Switch[coords,
   "Hyperboloidal",
-    RadialFunction = Function[{r}, Evaluate[chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][1/r]]];
-    domain = {rp[a, M], \[Infinity]};,
-  "CompactifiedHyperboloidal",
-    RadialFunction = Function[{\[Sigma]]}, Evaluate[chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][\[Sigma]]]];
-    domain = {0, 1/rp[a,M]};,
-  "BL" | "BoyerLindquist" | "Boyer-Lindquist",
+    RadialFunction = Function[{r}, Evaluate[chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][1/r]]];,
+  "BL" | "BoyerLindquist" | "Boyer\[Dash]Lindquist",
     RadialFunction = Function[{r}, Evaluate[
       With[{rp = rp[a, M], rm = rm[a, M]},
         h = (2 M rp )/(rp-rm) Log[r-rp]-(2 M rm )/(rp-rm) Log[r-rm]-r-4 M Log[r];
         h\[Phi] = a/(rp-rm) Log[(r-rp)/(r-rm)];
-        chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][1/r] Exp[-I*\[Omega]*h+I*m*h\[Phi]]]]];
-    domain = {rp[a, M], \[Infinity]};,
+        chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][1/r] Exp[-I*\[Omega]*h+I*m*h\[Phi]]]]];,
   _,
     Message[QNMRadial::coords, coords];
     Return[$Failed];
@@ -743,7 +661,7 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
   (* Return QNMRadialFunction *)
   QNMRadialFunction[<|"s" -> s, "l" -> l, "m" -> m, "n" -> n, "a" -> a, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
     "Method" -> "SpectralHyperboloidal", "Amplitudes" -> <|"\[ScriptCapitalH]" -> ef[[-1]]/ef[[-1]], "\[ScriptCapitalI]" -> ef[[1]]/ef[[-1]]|>, "RadialFunction" -> RadialFunction,
-    "Coordinates" -> coords, "Domain" -> domain|>]
+    "Coordinates" -> coords, "Domain" -> {rp[a, M], \[Infinity]}|>]
 ]
 
 
