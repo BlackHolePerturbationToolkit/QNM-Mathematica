@@ -1,6 +1,6 @@
 Paclet[
   "Name" -> "QNM",
-  "Version" -> "0.4.0",
+  "Version" -> "0.4.1",
   "MathematicaVersion" -> "10.2+",
   "Creator" -> "Black Hole Perturbation Toolkit",
   "Description" -> "A set of functions for computing quasinormal mode solutions to the Teukolsky equation.",
