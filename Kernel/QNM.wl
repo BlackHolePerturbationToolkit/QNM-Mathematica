@@ -726,7 +726,7 @@ QNMRadialHyperboloidal[s_, l_, m_, n_, a_, \[Omega]_, opts:OptionsPattern[]] :=
     RadialFunction = Function[{r}, Evaluate[chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][1/r]]];
     domain = {rp[a, M], \[Infinity]};,
   "CompactifiedHyperboloidal",
-    RadialFunction = Function[{\[Sigma]]}, Evaluate[chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][\[Sigma]]]];
+    RadialFunction = Function[{\[Sigma]}, Evaluate[chebInterp[Reverse[ef/ef[[-1]]], {0, 1/rp[a, M]}][\[Sigma]]]];
     domain = {0, 1/rp[a,M]};,
   "BL" | "BoyerLindquist" | "Boyer-Lindquist",
     RadialFunction = Function[{r}, Evaluate[
